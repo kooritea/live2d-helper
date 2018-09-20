@@ -55,16 +55,16 @@ javascript
 
 ```javascript
 var kaguya = {
-  canvasId:'live2d',
-  baseUrl: './model/kaguya',
-  modelUrl: './model/kaguya/model.json',
+  canvasId:'live2d', // canvas的id
+  baseUrl: './model/kaguya', // 资源原始路径
+  modelUrl: './model/kaguya/model.json', // 自定义model.json路径 方便用于一键换装
   crossOrigin: false, // 是否允许跨域获取数据(前提是http header中已有允许的跨域字段) def:false
   interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
   idle: 'idle', // 自动触发的mation
   width: "800", // html上的width属性优先级更高
   height: "800",// html上的height属性优先级更高
   globalollowPointer: false, // 全局跟随鼠标 def:false
-  scaling: true, // 允许滚轮放大缩小 def:false
+  scaling: true, // 是否允许滚轮放大缩小 def:false
   debug: {
     DEBUG_LOG: false,
     DEBUG_MOUSE_LOG : false,
@@ -83,7 +83,7 @@ var kaguya = {
   },
   view: {
     VIEW_MAX_SCALE: 2, // 最大缩放比例
-    VIEW_MIN_SCALE: 0.8,// 最小缩放比例
+    VIEW_MIN_SCALE: 0.8, // 最小缩放比例
     VIEW_LOGICAL_LEFT: -1,
     VIEW_LOGICAL_RIGHT: 1,
     VIEW_LOGICAL_MAX_LEFT: -2,
@@ -91,7 +91,7 @@ var kaguya = {
     VIEW_LOGICAL_MAX_BOTTOM: -2,
     VIEW_LOGICAL_MAX_TOP: 2
   },
-  binding:{
+  binding:{ // 需要自行根据不同模型的model.json将mation绑定到对应的hit_areas 支持hit_areas_custom
     head: 'flick_head',
     face: 'tap_face',
     breast: ['tap_breast','shake'],
@@ -103,5 +103,5 @@ var kaguya = {
   }
 }
 
-loadLive2d('canvasId', 'baseUrl')
+loadLive2d(kaguya)
 ```
