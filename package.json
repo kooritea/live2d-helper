@@ -1,0 +1,29 @@
+{
+  "name": "live2d-helper",
+  "version": "0.0.2",
+  "description": "Quick display of live2d model",
+  "main": "dist/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "dist/index.js"
+  ],
+  "scripts": {
+    "test": "echo 'open demo/index.html'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kooritea/live2d-helper.git"
+  },
+  "keywords": [
+    "live2d",
+    "waifu"
+  ],
+  "author": "kooritea",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/kooritea/live2d-helper/issues"
+  },
+  "homepage": "https://github.com/kooritea/live2d-helper#readme"
+}

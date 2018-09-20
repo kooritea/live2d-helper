@@ -1,0 +1,45 @@
+distfile="./dist/index.js"
+echo "(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.loadLive2d = factory());
+}(this, (function () {" > $distfile
+
+echo '
+//live2d.min.js
+' >> ./dist/index.js
+cat ./lib/live2d.min.js >> $distfile
+
+echo '
+//Live2DFramework.js
+' >> ./dist/index.js
+cat ./lib/Live2DFramework.js >> $distfile
+
+echo '
+//MatrixStack.js
+' >> ./dist/index.js
+cat ./lib/utils/MatrixStack.js >> $distfile
+
+echo '
+//ModelSettingJson.js
+' >> ./dist/index.js
+cat ./lib/utils/ModelSettingJson.js >> $distfile
+
+echo '
+//lPlatformManager.js
+' >> ./dist/index.js
+cat ./lib/PlatformManager.js >> $distfile
+
+echo '
+//LAppModel.js
+' >> ./dist/index.js
+cat ./lib/LAppModel.js >> $distfile
+
+echo '
+//index.js
+' >> ./dist/index.js
+cat ./lib/index.js >> $distfile
+
+echo 'return loadLive2d
+
+})))' >> $distfile
