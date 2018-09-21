@@ -8,7 +8,7 @@
     <canvas id="live2d" class="live2d"></canvas>
     <script src="../dist/index.js"></script>
     <script type="text/javascript">
-      var kaguya = {
+      loadLive2d({
         canvasId:'live2d',
         baseUrl: './model/kaguya',
         modelUrl: './model/kaguya/model.json',
@@ -52,17 +52,11 @@
           belly: 'tap_belly',
           leg: 'tap_leg'
         },
-        initModelCallback(){
+        initModelCallback(waifu){
+          console.log(waifu)
           console.log('模型加载完毕')
         }
-      }
-      // loadLive2d('live2d','model/hakasen')
-      loadLive2d(kaguya)
-      // PRIORITY_NONE : 0, // 无权执行
-      // PRIORITY_IDLE : 1, //可被2,3打断
-      // PRIORITY_NORMAL : 2,//只能被3打断
-      // PRIORITY_FORCE : 3,//只能被3打断
-      // fix isMinScale is error
+      })
     </script>
   </body>
 </html>

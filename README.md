@@ -4,42 +4,31 @@
 
 ## 如何使用
 
-### 引入 live2d-helper
+### 下载 live2d-helper
 
-1、
 ```bash
 npm install live2d-helper
 ```
-2、
+### 引入 live2d-helper
 ```html
 <script src="./dist/index.js"></script>
 ```
-
  or
-
 ```javascript
 var loadLive2d = require('live2d-helper')
 ```
-
 or
-
 ```javascript
 import loadLive2d from 'loadLive2d'
 ```
 ### 简单版
 
-html
-
 ```html
-
-<canvas id="canvasId" width="300" height="300" class="live2d"></canvas>
-
-```
-javascript
-
-```javascript
-loadLive2d('canvasId', 'baseUrl')
-// baseUrl即所有Live2d的资源原始路径  默认model.jsoon路径为baseUrl/model.jsoon
+<canvas id="canvasId" width="300" height="300"></canvas>
+<script>
+  loadLive2d('canvasId', 'baseUrl')
+  // baseUrl即所有Live2d的资源原始路径  默认model.jsoon路径为baseUrl/model.jsoon
+</script>
 ```
 
 ### 详细设置
@@ -47,14 +36,12 @@ loadLive2d('canvasId', 'baseUrl')
 html
 
 ```html
-
-<canvas id="canvasId" width="800" height="800" class="live2d"></canvas>
-
+<canvas id="canvasId"></canvas>
 ```
 javascript
 
 ```javascript
-var kaguya = {
+loadLive2d({
   canvasId:'live2d', // canvas的id
   baseUrl: './model/kaguya', // 资源原始路径
   modelUrl: './model/kaguya/model.json', // 自定义model.json路径 方便用于一键换装
@@ -64,7 +51,7 @@ var kaguya = {
   width: "800", // html上的width属性优先级更高
   height: "800",// html上的height属性优先级更高
   globalollowPointer: false, // 全局跟随鼠标 def:false
-  scaling: true, // 是否允许滚轮放大缩小 def:false
+  scaling: true, // 是否允许使用滚轮放大缩小 def:false
   debug: {
     DEBUG_LOG: false,
     DEBUG_MOUSE_LOG : false,
@@ -98,10 +85,34 @@ var kaguya = {
     belly: 'tap_belly',
     leg: 'tap_leg'
   },
-  initModelCallback(){
-    console.log('模型加载完毕')
+  initModelCallback(waifu){
+    console.log(waifu)
+    console.log('加载完毕')
   }
-}
-
-loadLive2d(kaguya)
+})
 ```
+
+### 进阶
+
+loadLive2d和initModelCallback 将会返回一个对象，该对象包含了官方demo所有的属性和方法
+
+为了方便,startRandomMotion和startMotion都可以通过该对象直接使用
+
+```javascript
+var waifu = loadLive2d('canvasId', 'baseUrl')
+
+waifu.startRandomMotion(mationName:string, priority:number)
+// 随机进行mationName下的一个mation,优先级为priority
+
+waifu.startMotion(mationName:string, no:number, priority:number)
+// 进行mationName下第no个mation,优先级为priority
+
+
+```
+
+|  官方名称  |  优先级  |        备注     |
+| :------: | :------: | :------------: |
+| PRIORITY_NONE | 0 |  无权执行   |
+| PRIORITY_IDLE | 1 | 可被2,3打断          |
+| PRIORITY_NORMAL | 2 | 只能被3打断          |
+| PRIORITY_FORCE | 3 | 只能被3打断          |
