@@ -1,6 +1,6 @@
 {
   "name": "live2d-helper",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Quick display of live2d model",
   "main": "dist/index.js",
   "directories": {
