@@ -68,10 +68,10 @@
 	"hit_areas":
 	[
 		{"name":"head", "id":"D_CORE.HEAD"},
-		{"name":"face", "id":"D_CORE.FACE"},
-		{"name":"breast", "id":"D_CORE.BREAST"},
-		{"name":"belly", "id":"D_CORE.BELLY"},
-		{"name":"leg", "id":"D_CORE.LEG"}
+		{"name":"face", "id":"D_CORE.FACE", "motion": "tap_face"},
+		{"name":"breast", "id":"D_CORE.BREAST", "motion": ["tap_breast","shake"]},
+		{"name":"belly", "id":"D_CORE.BELLY", "motion": "tap_belly"},
+		{"name":"leg", "id":"D_CORE.LEG", "motion": "tap_leg"}
 	],
 	"motion_settings":
 	{

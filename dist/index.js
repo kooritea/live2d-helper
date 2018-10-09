@@ -2430,16 +2430,16 @@ LAppModel.prototype.setRandomExpression = function()
 
 
 
-LAppModel.prototype.startRandomMotion = function(name, priority)
+LAppModel.prototype.startRandomMotion = function(name, priority, hitArea, callback)
 {
     var max = this.modelSetting.getMotionNum(name);
     var no = parseInt(Math.random() * max);
-    this.startMotion(name, no, priority);
+    this.startMotion(name, no, priority, hitArea, callback);
 }
 
 
 
-LAppModel.prototype.startMotion = function(name, no, priority)
+LAppModel.prototype.startMotion = function(name, no, priority, hitArea, callback)
 {
     // console.log("startMotion : " + name + " " + no + " " + priority);
     var motionName = this.modelSetting.getMotionFile(name, no);
@@ -2460,7 +2460,9 @@ LAppModel.prototype.startMotion = function(name, no, priority)
             console.log("Motion is running.")
         return;
     }
-
+    if(typeof callback === 'function'){
+      callback(hitArea,motionName,name)
+    }
     var thisRef = this;
     var motion;
 
@@ -2740,9 +2742,6 @@ function mouseEvent(e)
       lookFront(obj);
   }
 }
-function test(){
-  console.log('test')
-}
 function touchEvent(e)
 {
   let obj = e.target.live2d
@@ -2857,18 +2856,37 @@ function modelTurnHead(obj,event)
     if(obj.model.modelSetting.json.hit_areas){
       for (let item of obj.model.modelSetting.json.hit_areas) {
         if (obj.model.hitTest(item.name, vx, vy)) {
-          if(obj.binding[item.name]){
-            let motionName
-            if(Array.isArray(obj.binding[item.name])){
-              motionName = obj.binding[item.name][parseInt(Math.random() * obj.binding[item.name].length)]
-            } else {
-              motionName = obj.binding[item.name]
-            }
-            obj.model.startRandomMotion(motionName,2);
-            if (obj.debug.DEBUG_LOG) {
-              console.log('Click on the ' + item.name)
-              console.log('Start motion: ' + motionName)
-            }
+          let motion
+          let motionName
+          let callback
+          if(typeof item.motion === 'string' || Array.isArray(motion)){ // 优先选择model.json定义的motion
+            motion = item.motion
+          } else if(typeof obj.binding[item.name] === 'string' || Array.isArray(motion)){
+            motion = obj.binding[item.name]
+          }
+          if(!motion && typeof item.motion === 'object') {
+            motion = item.motion.motion
+          } else if(!motion && typeof obj.binding[item.name] === 'object'){
+            motion = obj.binding[item.name].motion
+          }
+
+          if(typeof obj.binding[item.name] === 'function' || typeof obj.binding[item.name] === 'object'){// 优先选择binding定义的callback
+            callback = typeof obj.binding[item.name].callback === 'function' ? obj.binding[item.name].callback : obj.binding[item.name]
+          } else if(typeof item.motion === 'function' || typeof item.motion === 'object'){
+            callback = typeof item.motion.callback === 'function' ? item.motion.callback : item.motion
+          }
+          if(!motion && !callback){
+            return
+          }
+          if(Array.isArray(motion)){
+            motionName = motion[parseInt(Math.random() * motion.length)]
+          } else if(typeof motion === 'string') {
+            motionName = motion
+          }
+          obj.model.startRandomMotion(motionName,2,item.name,callback);
+          if (obj.debug.DEBUG_LOG) {
+            console.log('Click on the ' + item.name)
+            console.log('Start motion: ' + motionName)
           }
           break
         }

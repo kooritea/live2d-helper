@@ -19,7 +19,7 @@ var loadLive2d = require('live2d-helper')
 ```
 or
 ```javascript
-import loadLive2d from 'loadLive2d'
+import loadLive2d from 'live2d-helper'
 ```
 ### 简单版
 
@@ -27,7 +27,7 @@ import loadLive2d from 'loadLive2d'
 <canvas id="canvasId" width="300" height="300"></canvas>
 <script>
   loadLive2d('canvasId', 'baseUrl')
-  // baseUrl即所有Live2d的资源原始路径  默认model.jsoon路径为baseUrl/model.jsoon
+  // baseUrl即所有Live2d的资源原始路径  默认model.json路径为baseUrl/model.json
 </script>
 ```
 
@@ -91,6 +91,48 @@ loadLive2d({
   }
 })
 ```
+
+## 点击区域绑定模型动作和回调函数
+1、在模型初始化的时候传入binding字段绑定
+
+```javascript
+loadLive2d({
+  "...": "...",
+  binding:{
+    head: {motion:['flick_head','shake'],callback:function(hitArea,motionName,name){console.log(hitArea);console.log(motionName);console.log(name)}},
+    face: 'tap_face',
+    breast: ['tap_breast','shake'],
+    belly: 'tap_belly',
+    leg: function(){console.log('hentai!')}
+  },
+  "...": "...",
+})
+```
+
+2、直接修改model.json绑定
+该方法不推荐绑定回调函数
+```json
+// model.json
+{
+  "...": "...",
+  "hit_areas":
+	[
+		{"name":"head", "id":"D_CORE.HEAD", "motion": "flick_head"},
+		{"name":"face", "id":"D_CORE.FACE", "motion": "tap_face"},
+		{"name":"breast", "id":"D_CORE.BREAST", "motion": ["tap_breast","shake"]},
+		{"name":"belly", "id":"D_CORE.BELLY", "motion": "tap_belly"},
+		{"name":"leg", "id":"D_CORE.LEG", "motion": "tap_leg"}
+	],
+  "...": "..."
+}
+```
+
+注意：
+
+  model.json中的motion优先级更高
+  
+  binding的callback优先级更高
+
 
 ### 进阶
 

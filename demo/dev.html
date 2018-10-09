@@ -67,8 +67,8 @@
       }
       loadLive2d({
         canvasId:'live2d',
-        baseUrl: './model/hakasen',
-        modelUrl: './model/hakasen/model.json',
+        baseUrl: './model/kaguya',
+        modelUrl: './model/kaguya/model.json',
         crossOrigin: false, // 是否允许跨域获取数据(前提是http header中已有允许的跨域字段) def:false
         interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
         idle: 'idle', // 自动触发的mation
@@ -103,7 +103,7 @@
           VIEW_LOGICAL_MAX_TOP: 2
         },
         binding:{
-          head: 'flick_head',
+          head: {motion:['flick_head','shake'],callback:function(hitArea,motionName,name){console.log(hitArea);console.log(motionName);console.log(name)}},
           face: 'tap_face',
           breast: ['tap_breast','shake'],
           belly: 'tap_belly',
@@ -112,7 +112,7 @@
         initModelCallback(waifu){
           console.log(waifu)
           console.log('模型加载完毕')
-          waifu.startRandomMotion('shake',2)
+          // waifu.startRandomMotion('shake',2)
         }
       })
     </script>
