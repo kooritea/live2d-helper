@@ -83,8 +83,9 @@ loadLive2d({
     face: 'tap_face',
     breast: ['tap_breast','shake'],
     belly: 'tap_belly',
-    leg: 'tap_leg'
+    leg: function(){console.log('hentai!')}
   },
+  autoLoadAudio:function(){console.log('audio loaded')}, // 自动下载音频 def：true
   initModelCallback(waifu){
     console.log(waifu)
     console.log('加载完毕')
@@ -130,7 +131,7 @@ loadLive2d({
 注意：
 
   model.json中的motion优先级更高
-  
+
   binding的callback优先级更高
 
 

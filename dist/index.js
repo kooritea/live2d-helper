@@ -2505,14 +2505,25 @@ LAppModel.prototype.setFadeInFadeOut = function(name, no, priority, motion)
     {
         var soundName = this.modelSetting.getMotionSound(name, no);
         // var player = new Sound(this.modelHomeDir + soundName);
-
-        var snd = document.createElement("audio");
         this.obj.audio.src = this.modelHomeDir + soundName;
+        // setTimeout(() => {
+        //   if(!this.obj.autoLoadAudio || this.obj.audio.paused){
+        //     if (this.obj.debug.DEBUG_LOG)
+        //         console.log("Start sound : " + soundName);
+        //
+        //     this.obj.audio.play();
+        //   }
+        //   else {
+        //     if (this.obj.debug.DEBUG_LOG)
+        //         console.log("the sound unloaded : " + soundName);
+        //   }
+        // })
         if (this.obj.debug.DEBUG_LOG)
             console.log("Start sound : " + soundName);
 
         this.obj.audio.play();
         this.mainMotionManager.startMotionPrio(motion, priority);
+
     }
 }
 
@@ -2570,7 +2581,7 @@ LAppModel.prototype.hitTest = function(id, testX, testY)
 //index.js
 
 function loadLive2d(data, data2) {
-  let {canvasId, baseUrl, modelUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalollowPointer, binding} = data
+  let {canvasId, baseUrl, modelUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalollowPointer, binding, autoLoadAudio} = data
   if(typeof data === 'string'){
     canvasId = data
     baseUrl = data2
@@ -2616,6 +2627,7 @@ function loadLive2d(data, data2) {
   obj.layout = layout
   obj.globalollowPointer = typeof globalollowPointer === 'boolean'?globalollowPointer: false
   obj.scaling = typeof scaling === 'boolean'?scaling: false
+  obj.autoLoadAudio = autoLoadAudio
   obj.audio = document.createElement("audio");
   obj.view = {
     VIEW_MAX_SCALE : 2,
@@ -3008,6 +3020,7 @@ function initModel(obj){
     modelHomeDir:obj.baseUrl
   },function(){
     initHit_areas_custom(obj)
+    loadAudio(obj)
     if(typeof obj.initModelCallback == 'function'){
       obj.initModelCallback(obj)
     }
@@ -3041,6 +3054,33 @@ function clearTexture(obj){
     clearInterval(obj.canvas.live2d.model.timmer)
     obj.canvas.live2d.audio.pause()
     delete obj.canvas.live2d
+  }
+}
+function loadAudio(obj){
+  if(obj.autoLoadAudio !== false){
+    let motions = obj.model.modelSetting.json.motions
+    let sounds = []
+    for(let motionName in motions){
+      for(let item of motions[motionName]){
+        if(item.sound){
+          sounds.push(obj.baseUrl + item.sound)
+        }
+      }
+    }
+    let i = 0
+    let load = function(){
+      if(i >= sounds.length) {
+        if (typeof obj.autoLoadAudio == "function") obj.autoLoadAudio();
+        return
+      }
+      let tmpAudio = document.createElement("audio");
+      tmpAudio.src = sounds[i]
+      tmpAudio.oncanplaythrough = function(){
+        i++;
+        load()
+      }
+    }
+    load()
   }
 }
 return loadLive2d
