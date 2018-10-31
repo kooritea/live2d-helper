@@ -1,5 +1,7 @@
 # Live2d-helper
 
+[![npm](https://img.shields.io/npm/v/live2d-helper.svg?style=flat)](https://www.npmjs.com/package/live2d-helper)
+
 基于官方live2d.js的、更加简单易用的live2d-helper，通过简单的配置在网页上显示live2d(waifu)
 
 ## 如何使用
