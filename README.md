@@ -134,17 +134,17 @@ loadLive2d({
 {
   "...": "...",
   "hit_areas_custom": {
-		"head_x": [-0.35, 0.6],
-		"head_y": [0.19, -0.2],
-		"body_x": [-0.3, -0.25],
-		"body_y": [0.3, -0.9],
+    "head_x": [-0.35, 0.6],
+    "head_y": [0.19, -0.2],
+    "body_x": [-0.3, -0.25],
+    "body_y": [0.3, -0.9],
     "binding": {
       "head": ["thanking"],
       "body": {
         "motion": ["tap_body","thanking"]
       }
     }
-	},
+  },
   "...": "..."
 }
 ```
