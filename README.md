@@ -52,7 +52,7 @@ loadLive2d({
   idle: 'idle', // 自动触发的mation
   width: "800", // html上的width属性优先级更高
   height: "800",// html上的height属性优先级更高
-  globalollowPointer: false, // 焦点跟随鼠标 def:false
+  globalollowPointer: false, // 老婆焦点跟随鼠标 def:false
   scaling: true, // 是否允许使用滚轮放大缩小 def:false
   debug: {
     DEBUG_LOG: false,
