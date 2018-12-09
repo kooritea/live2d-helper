@@ -6,7 +6,7 @@
 	],
 	"motions":{
 		"shake":[
-			{"file":"motions/7.mtn","sound":"sound/kaguya_live2d_001.wav","text":81781,"sound_delay":-2}
+			{"file":"motions/7.mtn","sound": ["sound/kaguya_live2d_001.wav","sound/kaguya_live2d_004.wav"],"text":81781,"sound_delay":-2}
 		],
 		"flick_head":[
 			{"file":"motions/1.mtn","sound":"sound/kaguya_live2d_004.wav","text":81775,"sound_delay":-2}

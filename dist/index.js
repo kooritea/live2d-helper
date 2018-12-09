@@ -2505,7 +2505,13 @@ LAppModel.prototype.setFadeInFadeOut = function(name, no, priority, motion)
     {
         var soundName = this.modelSetting.getMotionSound(name, no);
         // var player = new Sound(this.modelHomeDir + soundName);
-        this.obj.audio.src = this.modelHomeDir + soundName;
+        let selectSoundName
+        if(Array.isArray(soundName)){
+          selectSoundName = soundName[parseInt(Math.random() * soundName.length)];
+        }else{
+          selectSoundName = soundName;
+        }
+        this.obj.audio.src = this.modelHomeDir + selectSoundName;
         // setTimeout(() => {
         //   if(!this.obj.autoLoadAudio || this.obj.audio.paused){
         //     if (this.obj.debug.DEBUG_LOG)
@@ -2519,7 +2525,7 @@ LAppModel.prototype.setFadeInFadeOut = function(name, no, priority, motion)
         //   }
         // })
         if (this.obj.debug.DEBUG_LOG)
-            console.log("Start sound : " + soundName);
+            console.log("Start sound : " + selectSoundName);
 
         this.obj.audio.play();
         this.mainMotionManager.startMotionPrio(motion, priority);
@@ -3063,7 +3069,13 @@ function loadAudio(obj){
     for(let motionName in motions){
       for(let item of motions[motionName]){
         if(item.sound){
-          sounds.push(obj.baseUrl + item.sound)
+          if(Array.isArray(item.sound)){
+            item.sound.forEach(function(sound){
+              sounds.push(obj.baseUrl + sound)
+            })
+          }else{
+            sounds.push(obj.baseUrl + item.sound)
+          }
         }
       }
     }
