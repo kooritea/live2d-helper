@@ -36,7 +36,20 @@
 		"tap_body": [{
 			"file": "motions/22.v2.touch.mtn",
 			"fade_in": 150,
-			"fade_out": 100
+			"fade_out": 100,
+			"sound": [
+				"sound/22-1.wav",
+				"sound/22-2.wav",
+				"sound/22-3.wav",
+				"sound/22-4.wav",
+				"sound/22-5.wav",
+				"sound/22-6.wav",
+				"sound/22-7.wav",
+				"sound/22-8.wav",
+				"sound/22-9.wav",
+				"sound/22-10.wav",
+				"sound/22-drag.wav"
+			]
 		}],
 		"thanking": [{
 			"file": "motions/22.v2.thanking.mtn",
