@@ -113,7 +113,7 @@ loadLive2d({
 ```
 
 2、直接修改model.json绑定
-该方法不推荐绑定回调函数
+该方法不能绑定回调函数
 ```json
 // model.json
 {
@@ -129,12 +129,30 @@ loadLive2d({
   "...": "..."
 }
 ```
+```json
+// model.json
+{
+  "...": "...",
+  "hit_areas_custom": {
+		"head_x": [-0.35, 0.6],
+		"head_y": [0.19, -0.2],
+		"body_x": [-0.3, -0.25],
+		"body_y": [0.3, -0.9],
+    "binding": {
+      "head": ["thanking"],
+      "body": {
+        "motion": ["tap_body","thanking"]
+      }
+    }
+	},
+  "...": "..."
+}
+```
+
 
 注意：
 
   model.json中的motion优先级更高
-
-  binding的callback优先级更高
 
 
 ### 进阶

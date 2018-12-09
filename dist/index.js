@@ -2877,9 +2877,9 @@ function modelTurnHead(obj,event)
           let motion
           let motionName
           let callback
-          if(typeof item.motion === 'string' || Array.isArray(motion)){ // 优先选择model.json定义的motion
+          if(typeof item.motion === 'string' || Array.isArray(item.motion)){ // 优先选择model.json定义的motion
             motion = item.motion
-          } else if(typeof obj.binding[item.name] === 'string' || Array.isArray(motion)){
+          } else if(typeof obj.binding[item.name] === 'string' || Array.isArray(obj.binding[item.name])){
             motion = obj.binding[item.name]
           }
           if(!motion && typeof item.motion === 'object') {
@@ -2890,21 +2890,22 @@ function modelTurnHead(obj,event)
 
           if(typeof obj.binding[item.name] === 'function' || typeof obj.binding[item.name] === 'object'){// 优先选择binding定义的callback
             callback = typeof obj.binding[item.name].callback === 'function' ? obj.binding[item.name].callback : obj.binding[item.name]
-          } else if(typeof item.motion === 'function' || typeof item.motion === 'object'){
-            callback = typeof item.motion.callback === 'function' ? item.motion.callback : item.motion
           }
-          if(!motion && !callback){
-            return
-          }
+
           if(Array.isArray(motion)){
             motionName = motion[parseInt(Math.random() * motion.length)]
           } else if(typeof motion === 'string') {
             motionName = motion
           }
-          obj.model.startRandomMotion(motionName,2,item.name,callback);
+
           if (obj.debug.DEBUG_LOG) {
-            console.log('Click on the ' + item.name)
-            console.log('Start motion: ' + motionName)
+            console.log('Click on the ' + name)
+          }
+          if(motionName){
+            obj.model.startRandomMotion(motionName,2,name,callback);
+            if (obj.debug.DEBUG_LOG) {
+              console.log('Start motion: ' + motionName)
+            }
           }
           break
         }
@@ -2915,21 +2916,58 @@ function modelTurnHead(obj,event)
       //   head_x: [-0.35, 0.6],
       //   head_y: [0.19, -0.2],
       //   body_x: [-0.3, -0.25],
-      //   body_y: [0.3, -0.9]
+      //   body_y: [0.3, -0.9],
+      //   binding
       // }
       for (let name in obj.model.modelSetting.json.hit_areas_custom_data) {
         let item = obj.model.modelSetting.json.hit_areas_custom_data[name]
         if(item.x[0]<vx&&item.x[1]>vy&&item.y[0]>vx&&item.y[1]<vy){// 点击命中自定义区域
-          if(obj.binding[name]){
-            let motionName
-            if(Array.isArray(obj.binding[name])){
-              motionName = obj.binding[name][parseInt(Math.random() * obj.binding[name].length)]
-            } else {
-              motionName = obj.binding[name]
-            }
-            obj.model.startRandomMotion(motionName,2);
+          let motion
+          let motionName
+          let callback
+          // if(obj.model.modelSetting.json.hit_areas_custom_data.binding[name]){
+          //   let tmp = obj.model.modelSetting.json.hit_areas_custom_data.binding[name]
+          //   // 首先检查model.json中是否绑定了motion
+          //   if(Array.isArray(tmp)){
+          //     motionName = tmp[parseInt(Math.random() * obj.binding[name].length)]
+          //   } else {
+          //     motionName = tmp
+          //   }
+          // } else if(obj.binding[name]){
+          //   if(Array.isArray(obj.binding[name])){
+          //     motionName = obj.binding[name][parseInt(Math.random() * obj.binding[name].length)]
+          //   } else {
+          //     motionName = obj.binding[name]
+          //   }
+          // }
+          let tmp = obj.model.modelSetting.json.hit_areas_custom.binding[name]
+          if(typeof tmp === 'string' || Array.isArray(tmp)){ // 优先选择model.json定义的motion
+            motion = tmp
+          } else if(typeof obj.binding[name] === 'string' || Array.isArray(obj.binding[name])){
+            motion = obj.binding[name]
+          }
+          if(!motion && typeof tmp === 'object') {
+            motion = tmp.motion
+          } else if(!motion && typeof obj.binding[name] === 'object'){
+            motion = obj.binding[name].motion
+          }
+
+          if(typeof obj.binding[name] === 'function' || typeof obj.binding[name] === 'object'){// 优先选择binding定义的callback
+            callback = typeof obj.binding[name].callback === 'function' ? obj.binding[name].callback : obj.binding[name]
+          }
+
+          if(Array.isArray(motion)){
+            motionName = motion[parseInt(Math.random() * motion.length)]
+          } else if(typeof motion === 'string') {
+            motionName = motion
+          }
+
+          if (obj.debug.DEBUG_LOG) {
+            console.log('Click on the ' + name)
+          }
+          if(motionName){
+            obj.model.startRandomMotion(motionName,2,name,callback);
             if (obj.debug.DEBUG_LOG) {
-              console.log('Click on the ' + name)
               console.log('Start motion: ' + motionName)
             }
           }
@@ -3040,6 +3078,7 @@ function initHit_areas_custom(obj){
       // 初始化
       obj.model.modelSetting.json.hit_areas_custom_data = {}
       for (let name in obj.model.modelSetting.json.hit_areas_custom) {
+        if(name === 'binding') continue
         let info = name.match(/(.*)?_(x|y)$/)
         if(!obj.model.modelSetting.json.hit_areas_custom_data[info[1]]){
           obj.model.modelSetting.json.hit_areas_custom_data[info[1]] = {}

@@ -1,0 +1,47 @@
+{
+	"model": "22.v2.moc",
+	"textures": ["texture/texture_00.png", "texture/closet.2018.lover/texture_01.png", "texture/closet.2018.lover/texture_02.png", "texture/closet.2018.lover/texture_03.png"],
+	"hit_areas_custom": {
+		"head_x": [-0.35, 0.6],
+		"head_y": [0.19, -0.2],
+		"body_x": [-0.3, -0.25],
+		"body_y": [0.3, -0.9],
+    "binding": {
+      "head": ["thanking"],
+      "body": {
+        "motion": ["tap_body","thanking"]
+      }
+    }
+	},
+	"layout": {
+		"center_x": -0.1,
+		"center_y": 0,
+		"width": 2.4,
+		"height": 2.4
+	},
+	"motions": {
+		"idle": [{
+			"file": "motions/22.v2.idle-01.mtn",
+			"fade_in": 2000,
+			"fade_out": 2000
+		}, {
+			"file": "motions/22.v2.idle-02.mtn",
+			"fade_in": 2000,
+			"fade_out": 2000
+		}, {
+			"file": "motions/22.v2.idle-03.mtn",
+			"fade_in": 1000,
+			"fade_out": 1000
+		}],
+		"tap_body": [{
+			"file": "motions/22.v2.touch.mtn",
+			"fade_in": 150,
+			"fade_out": 100
+		}],
+		"thanking": [{
+			"file": "motions/22.v2.thanking.mtn",
+			"fade_in": 2000,
+			"fade_out": 2000
+		}]
+	}
+}
