@@ -2498,40 +2498,24 @@ LAppModel.prototype.setFadeInFadeOut = function(name, no, priority, motion)
     if (this.obj.debug.DEBUG_LOG)
             console.log("Start motion : " + motionName);
 
-    if (this.modelSetting.getMotionSound(name, no) == null)
-    {
-        this.mainMotionManager.startMotionPrio(motion, priority);
-    }
-    else
-    {
-        var soundName = this.modelSetting.getMotionSound(name, no);
-        // var player = new Sound(this.modelHomeDir + soundName);
-        let selectSoundName
-        if(Array.isArray(soundName)){
-          selectSoundName = soundName[parseInt(Math.random() * soundName.length)];
-        }else{
-          selectSoundName = soundName;
-        }
-        this.obj.audio.src = this.modelHomeDir + selectSoundName;
-        // setTimeout(() => {
-        //   if(!this.obj.autoLoadAudio || this.obj.audio.paused){
-        //     if (this.obj.debug.DEBUG_LOG)
-        //         console.log("Start sound : " + soundName);
-        //
-        //     this.obj.audio.play();
-        //   }
-        //   else {
-        //     if (this.obj.debug.DEBUG_LOG)
-        //         console.log("the sound unloaded : " + soundName);
-        //   }
-        // })
-        if (this.obj.debug.DEBUG_LOG)
-            console.log("Start sound : " + selectSoundName);
-
+    if (this.modelSetting.getMotionSound(name, no)){
+      var soundName = this.modelSetting.getMotionSound(name, no);
+      // var player = new Sound(this.modelHomeDir + soundName);
+      let selectSoundName
+      if(Array.isArray(soundName)){
+        selectSoundName = soundName[parseInt(Math.random() * soundName.length)];
+      }else{
+        selectSoundName = soundName;
+      }
+      this.obj.audio.oncanplaythrough = () => {
         this.obj.audio.play();
-        this.mainMotionManager.startMotionPrio(motion, priority);
-
+        if (this.obj.debug.DEBUG_LOG){
+          console.log("Start sound : " + selectSoundName);
+        }
+      }
+      this.obj.audio.src = this.modelHomeDir + selectSoundName;
     }
+    this.mainMotionManager.startMotionPrio(motion, priority);
 }
 
 
@@ -2900,12 +2884,12 @@ function modelTurnHead(obj,event)
           }
 
           if (obj.debug.DEBUG_LOG) {
-            console.log('Click on the ' + name)
+            console.log('Click on the ' + item.name)
           }
           if(motionName){
             obj.model.startRandomMotion(motionName,2,name,callback);
             if (obj.debug.DEBUG_LOG) {
-              console.log('Start motion: ' + motionName)
+              console.log('Start motion name: ' + motionName)
             }
           }
           break
@@ -2969,7 +2953,7 @@ function modelTurnHead(obj,event)
           if(motionName){
             obj.model.startRandomMotion(motionName,2,name,callback);
             if (obj.debug.DEBUG_LOG) {
-              console.log('Start motion: ' + motionName)
+              console.log('Start motion name: ' + motionName)
             }
           }
           break
@@ -3111,10 +3095,14 @@ function loadAudio(obj){
         if(item.sound){
           if(Array.isArray(item.sound)){
             item.sound.forEach(function(sound){
-              sounds.push(obj.baseUrl + sound)
+              if(!sounds.includes(obj.baseUrl + sound)){
+                sounds.push(obj.baseUrl + sound)
+              }
             })
           }else{
-            sounds.push(obj.baseUrl + item.sound)
+            if(!sounds.includes(obj.baseUrl + item.sound)){
+              sounds.push(obj.baseUrl + item.sound)
+            }
           }
         }
       }
