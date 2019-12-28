@@ -2105,8 +2105,7 @@ PlatformManager.prototype.log  = function(txt/*String*/)
 //  class LAppModel     extends L2DBaseModel
 //============================================================
 //============================================================
-function LAppModel(obj)
-{
+function LAppModel(obj) {
     //L2DBaseModel.apply(this, arguments);
     L2DBaseModel.prototype.constructor.call(this);
 
@@ -2114,21 +2113,23 @@ function LAppModel(obj)
     this.modelSetting = null;
     this.tmpMatrix = [];
     this.obj = obj
-    this.timmer = setInterval(() => {
-      if (this.mainMotionManager.isFinished())
-      {
-       this.startRandomMotion(this.obj.idle, 1);
-      }
-    },this.obj.interval)
+    this.nextStartRandomMotion = () => {
+        if (this.obj.interval) {
+            setTimeout(() => {
+                this.startRandomMotion(this.obj.idle, 1);
+            }, this.obj.interval)
+        }
+    }
+    if (this.obj.interval) {
+        this.nextStartRandomMotion()
+    }
 
 }
 LAppModel.prototype = new L2DBaseModel();
 
-LAppModel.prototype.load = function(gl, loadPath, callback)
-{
+LAppModel.prototype.load = function (gl, loadPath, callback) {
     this.setUpdating(true);
     this.setInitialized(false);
-
     // this.modelHomeDir = modelSettingPath.substring(0, modelSettingPath.lastIndexOf("/") + 1);
     this.modelHomeDir = loadPath.modelHomeDir
 
@@ -2136,26 +2137,23 @@ LAppModel.prototype.load = function(gl, loadPath, callback)
 
     var thisRef = this;
 
-    this.modelSetting.loadModelSetting(loadPath.modelSettingPath, function(){
+    this.modelSetting.loadModelSetting(loadPath.modelSettingPath, function () {
 
         var path = thisRef.modelHomeDir + thisRef.modelSetting.getModelFile();
-        thisRef.loadModelData(path, function(model){
+        thisRef.loadModelData(path, function (model) {
 
-            for (var i = 0; i < thisRef.modelSetting.getTextureNum(); i++)
-            {
+            for (var i = 0; i < thisRef.modelSetting.getTextureNum(); i++) {
                 var texPaths = thisRef.modelHomeDir +
-                thisRef.modelSetting.getTextureFile(i);
-                thisRef.loadTexture(i, texPaths, thisRef.obj , function() {
+                    thisRef.modelSetting.getTextureFile(i);
+                thisRef.loadTexture(i, texPaths, thisRef.obj, function () {
 
-                    if( thisRef.isTexLoaded ) {
+                    if (thisRef.isTexLoaded) {
 
-                        if (thisRef.modelSetting.getExpressionNum() > 0)
-                        {
+                        if (thisRef.modelSetting.getExpressionNum() > 0) {
 
                             thisRef.expressions = {};
 
-                            for (var j = 0; j < thisRef.modelSetting.getExpressionNum(); j++)
-                            {
+                            for (var j = 0; j < thisRef.modelSetting.getExpressionNum(); j++) {
                                 var expName = thisRef.modelSetting.getExpressionName(j);
                                 var expFilePath = thisRef.modelHomeDir +
                                     thisRef.modelSetting.getExpressionFile(j);
@@ -2163,51 +2161,44 @@ LAppModel.prototype.load = function(gl, loadPath, callback)
                                 thisRef.loadExpression(expName, expFilePath);
                             }
                         }
-                        else
-                        {
+                        else {
                             thisRef.expressionManager = null;
                             thisRef.expressions = {};
                         }
 
 
 
-                        if (thisRef.eyeBlink == null)
-                        {
+                        if (thisRef.eyeBlink == null) {
                             thisRef.eyeBlink = new L2DEyeBlink();
                         }
 
 
-                        if (thisRef.modelSetting.getPhysicsFile() != null)
-                        {
+                        if (thisRef.modelSetting.getPhysicsFile() != null) {
                             thisRef.loadPhysics(thisRef.modelHomeDir +
-                                                thisRef.modelSetting.getPhysicsFile());
+                                thisRef.modelSetting.getPhysicsFile());
                         }
-                        else
-                        {
+                        else {
                             thisRef.physics = null;
                         }
 
 
 
-                        if (thisRef.modelSetting.getPoseFile() != null)
-                        {
+                        if (thisRef.modelSetting.getPoseFile() != null) {
                             thisRef.loadPose(
                                 thisRef.modelHomeDir +
                                 thisRef.modelSetting.getPoseFile(),
-                                function() {
+                                function () {
                                     thisRef.pose.updateParam(thisRef.live2DModel);
                                 }
                             );
                         }
-                        else
-                        {
+                        else {
                             thisRef.pose = null;
                         }
 
 
 
-                        if (thisRef.modelSetting.getLayout() != null)
-                        {
+                        if (thisRef.modelSetting.getLayout() != null) {
                             var layout = thisRef.modelSetting.getLayout();
                             if (layout["width"] != null)
                                 thisRef.modelMatrix.setWidth(layout["width"]);
@@ -2231,8 +2222,7 @@ LAppModel.prototype.load = function(gl, loadPath, callback)
                             if (layout["right"] != null)
                                 thisRef.modelMatrix.right(layout["right"]);
                         }
-                        if (thisRef.obj.layout)
-                        {
+                        if (thisRef.obj.layout) {
                             var layout = thisRef.obj.layout
                             if (layout["width"])
                                 thisRef.modelMatrix.setWidth(layout["width"]);
@@ -2257,8 +2247,7 @@ LAppModel.prototype.load = function(gl, loadPath, callback)
                                 thisRef.modelMatrix.right(layout["right"]);
                         }
 
-                        for (var j = 0; j < thisRef.modelSetting.getInitParamNum(); j++)
-                        {
+                        for (var j = 0; j < thisRef.modelSetting.getInitParamNum(); j++) {
 
                             thisRef.live2DModel.setParamFloat(
                                 thisRef.modelSetting.getInitParamID(j),
@@ -2266,8 +2255,7 @@ LAppModel.prototype.load = function(gl, loadPath, callback)
                             );
                         }
 
-                        for (var j = 0; j < thisRef.modelSetting.getInitPartsVisibleNum(); j++)
-                        {
+                        for (var j = 0; j < thisRef.modelSetting.getInitPartsVisibleNum(); j++) {
 
                             thisRef.live2DModel.setPartsOpacity(
                                 thisRef.modelSetting.getInitPartsVisibleID(j),
@@ -2298,8 +2286,7 @@ LAppModel.prototype.load = function(gl, loadPath, callback)
 
 
 
-LAppModel.prototype.release = function(gl)
-{
+LAppModel.prototype.release = function (gl) {
     // this.live2DModel.deleteTextures();
     var pm = Live2DFramework.getPlatformManager();
 
@@ -2308,14 +2295,12 @@ LAppModel.prototype.release = function(gl)
 
 
 
-LAppModel.prototype.preloadMotionGroup = function(name)
-{
+LAppModel.prototype.preloadMotionGroup = function (name) {
     var thisRef = this;
 
-    for (var i = 0; i < this.modelSetting.getMotionNum(name); i++)
-    {
+    for (var i = 0; i < this.modelSetting.getMotionNum(name); i++) {
         var file = this.modelSetting.getMotionFile(name, i);
-        this.loadMotion(file, this.modelHomeDir + file, function(motion) {
+        this.loadMotion(file, this.modelHomeDir + file, function (motion) {
             motion.setFadeIn(thisRef.modelSetting.getMotionFadeIn(name, i));
             motion.setFadeOut(thisRef.modelSetting.getMotionFadeOut(name, i));
         });
@@ -2324,12 +2309,10 @@ LAppModel.prototype.preloadMotionGroup = function(name)
 }
 
 
-LAppModel.prototype.update = function()
-{
+LAppModel.prototype.update = function () {
     // console.log("--> LAppModel.update()");
 
-    if(this.live2DModel == null)
-    {
+    if (this.live2DModel == null) {
         if (this.obj.debug.DEBUG_LOG) console.error("Failed to update.");
 
         return;
@@ -2348,7 +2331,7 @@ LAppModel.prototype.update = function()
     var update = this.mainMotionManager.updateParam(this.live2DModel);
     if (!update) {
 
-        if(this.eyeBlink != null) {
+        if (this.eyeBlink != null) {
             this.eyeBlink.updateParam(this.live2DModel);
         }
     }
@@ -2361,8 +2344,7 @@ LAppModel.prototype.update = function()
 
     if (this.expressionManager != null &&
         this.expressions != null &&
-        !this.expressionManager.isFinished())
-    {
+        !this.expressionManager.isFinished()) {
         this.expressionManager.updateParam(this.live2DModel);
     }
 
@@ -2374,7 +2356,7 @@ LAppModel.prototype.update = function()
 
 
 
-    this.live2DModel.addToParamFloat("PARAM_BODY_ANGLE_X", this.dragX*10, 1);
+    this.live2DModel.addToParamFloat("PARAM_BODY_ANGLE_X", this.dragX * 10, 1);
 
 
 
@@ -2384,31 +2366,29 @@ LAppModel.prototype.update = function()
 
 
     this.live2DModel.addToParamFloat("PARAM_ANGLE_X",
-                                     Number((15 * Math.sin(t / 6.5345))), 0.5);
+        Number((15 * Math.sin(t / 6.5345))), 0.5);
     this.live2DModel.addToParamFloat("PARAM_ANGLE_Y",
-                                     Number((8 * Math.sin(t / 3.5345))), 0.5);
+        Number((8 * Math.sin(t / 3.5345))), 0.5);
     this.live2DModel.addToParamFloat("PARAM_ANGLE_Z",
-                                     Number((10 * Math.sin(t / 5.5345))), 0.5);
+        Number((10 * Math.sin(t / 5.5345))), 0.5);
     this.live2DModel.addToParamFloat("PARAM_BODY_ANGLE_X",
-                                     Number((4 * Math.sin(t / 15.5345))), 0.5);
+        Number((4 * Math.sin(t / 15.5345))), 0.5);
     this.live2DModel.setParamFloat("PARAM_BREATH",
-                                   Number((0.5 + 0.5 * Math.sin(t / 3.2345))), 1);
+        Number((0.5 + 0.5 * Math.sin(t / 3.2345))), 1);
 
 
-    if (this.physics != null)
-    {
+    if (this.physics != null) {
         this.physics.updateParam(this.live2DModel);
     }
 
 
-    if (this.lipSync == null)
-    {
+    if (this.lipSync == null) {
         this.live2DModel.setParamFloat("PARAM_MOUTH_OPEN_Y",
-                                       this.lipSyncValue);
+            this.lipSyncValue);
     }
 
 
-    if( this.pose != null ) {
+    if (this.pose != null) {
         this.pose.updateParam(this.live2DModel);
     }
     this.live2DModel.update();
@@ -2416,11 +2396,9 @@ LAppModel.prototype.update = function()
 
 
 
-LAppModel.prototype.setRandomExpression = function()
-{
+LAppModel.prototype.setRandomExpression = function () {
     var tmp = [];
-    for (var name in this.expressions)
-    {
+    for (var name in this.expressions) {
         tmp.push(name);
     }
 
@@ -2431,8 +2409,7 @@ LAppModel.prototype.setRandomExpression = function()
 
 
 
-LAppModel.prototype.startRandomMotion = function(name, priority, hitArea, callback)
-{
+LAppModel.prototype.startRandomMotion = function (name, priority, hitArea, callback) {
     var max = this.modelSetting.getMotionNum(name);
     var no = parseInt(Math.random() * max);
     this.startMotion(name, no, priority, hitArea, callback);
@@ -2440,15 +2417,13 @@ LAppModel.prototype.startRandomMotion = function(name, priority, hitArea, callba
 
 
 
-LAppModel.prototype.startMotion = function(name, no, priority, hitArea, callback)
-{
+LAppModel.prototype.startMotion = function (name, no, priority, hitArea, callback) {
     // console.log("startMotion : " + name + " " + no + " " + priority);
     var motionName = this.modelSetting.getMotionFile(name, no);
 
-    if (motionName == null || motionName == "")
-    {
+    if (motionName == null || motionName == "") {
         if (this.obj.debug.DEBUG_LOG)
-            console.error("Failed to motion. The name is "+name);
+            console.error("Failed to motion. The name is " + name);
         return;
     }
     if (priority == 3) // 最高优先级
@@ -2461,15 +2436,14 @@ LAppModel.prototype.startMotion = function(name, no, priority, hitArea, callback
             console.log("Motion is running.")
         return;
     }
-    if(typeof callback === 'function'){
-      callback(hitArea,motionName,name)
+    if (typeof callback === 'function') {
+        callback(hitArea, motionName, name)
     }
     var thisRef = this;
     var motion;
 
-    if (this.motions[name] == null)
-    {
-        this.loadMotion(null, this.modelHomeDir + motionName, function(mtn) {
+    if (this.motions[name] == null) {
+        this.loadMotion(null, this.modelHomeDir + motionName, function (mtn) {
             motion = mtn;
 
 
@@ -2477,8 +2451,7 @@ LAppModel.prototype.startMotion = function(name, no, priority, hitArea, callback
 
         });
     }
-    else
-    {
+    else {
         motion = this.motions[name];
 
 
@@ -2487,8 +2460,7 @@ LAppModel.prototype.startMotion = function(name, no, priority, hitArea, callback
 }
 
 
-LAppModel.prototype.setFadeInFadeOut = function(name, no, priority, motion)
-{
+LAppModel.prototype.setFadeInFadeOut = function (name, no, priority, motion) {
     var motionName = this.modelSetting.getMotionFile(name, no);
 
     motion.setFadeIn(this.modelSetting.getMotionFadeIn(name, no));
@@ -2496,32 +2468,39 @@ LAppModel.prototype.setFadeInFadeOut = function(name, no, priority, motion)
 
 
     if (this.obj.debug.DEBUG_LOG)
-            console.log("Start motion : " + motionName);
+        console.log("Start motion : " + motionName);
 
-    if (this.modelSetting.getMotionSound(name, no)){
-      var soundName = this.modelSetting.getMotionSound(name, no);
-      // var player = new Sound(this.modelHomeDir + soundName);
-      let selectSoundName
-      if(Array.isArray(soundName)){
-        selectSoundName = soundName[parseInt(Math.random() * soundName.length)];
-      }else{
-        selectSoundName = soundName;
-      }
-      this.obj.audio.oncanplaythrough = () => {
-        this.obj.audio.play();
-        if (this.obj.debug.DEBUG_LOG){
-          console.log("Start sound : " + selectSoundName);
+    if (this.modelSetting.getMotionSound(name, no)) {
+        var soundName = this.modelSetting.getMotionSound(name, no);
+        // var player = new Sound(this.modelHomeDir + soundName);
+        let selectSoundName
+        if (Array.isArray(soundName)) {
+            selectSoundName = soundName[parseInt(Math.random() * soundName.length)];
+        } else {
+            selectSoundName = soundName;
         }
-      }
-      this.obj.audio.src = this.modelHomeDir + selectSoundName;
+        this.obj.audio.oncanplaythrough = () => {
+            this.obj.audio.play();
+            if (this.obj.debug.DEBUG_LOG) {
+                console.log("Start sound : " + selectSoundName);
+            }
+            this.obj.audio.onended = () => {
+                if (this.obj.debug.DEBUG_LOG) {
+                    console.log("Wait next sound ");
+                }
+                this.nextStartRandomMotion()
+            }
+        }
+        this.obj.audio.src = this.modelHomeDir + selectSoundName;
+    } else {
+        this.nextStartRandomMotion()
     }
     this.mainMotionManager.startMotionPrio(motion, priority);
 }
 
 
 
-LAppModel.prototype.setExpression = function(name)
-{
+LAppModel.prototype.setExpression = function (name) {
     var motion = this.expressions[name];
 
     if (this.obj.debug.DEBUG_LOG)
@@ -2532,8 +2511,7 @@ LAppModel.prototype.setExpression = function(name)
 
 
 
-LAppModel.prototype.draw = function(gl)
-{
+LAppModel.prototype.draw = function (gl) {
     //console.log("--> LAppModel.draw()");
 
     // if(this.live2DModel == null) return;
@@ -2553,13 +2531,10 @@ LAppModel.prototype.draw = function(gl)
 
 
 
-LAppModel.prototype.hitTest = function(id, testX, testY)
-{
+LAppModel.prototype.hitTest = function (id, testX, testY) {
     var len = this.modelSetting.getHitAreaNum();
-    for (var i = 0; i < len; i++)
-    {
-        if (id == this.modelSetting.getHitAreaName(i))
-        {
+    for (var i = 0; i < len; i++) {
+        if (id == this.modelSetting.getHitAreaName(i)) {
             var drawID = this.modelSetting.getHitAreaID(i);
 
             return this.hitTestSimple(drawID, testX, testY);
@@ -2572,19 +2547,19 @@ LAppModel.prototype.hitTest = function(id, testX, testY)
 //index.js
 
 function loadLive2d(data, data2) {
-  return new live2dHelper(data,data2)
+  return new live2dHelper(data, data2)
 }
 
-function live2dHelper(data,data2){
-  let {canvasId, baseUrl, modelUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalollowPointer, binding, autoLoadAudio} = data
-  if(typeof data === 'string'){
+function live2dHelper(data, data2) {
+  let { canvasId, baseUrl, modelUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalollowPointer, binding, autoLoadAudio } = data
+  if (typeof data === 'string') {
     canvasId = data
     baseUrl = data2
   }
-  if(!canvasId || !baseUrl){
+  if (!canvasId || !baseUrl) {
     return
   }
-  this.baseUrl = /\/$/.test(baseUrl)?baseUrl:baseUrl+'/'
+  this.baseUrl = /\/$/.test(baseUrl) ? baseUrl : baseUrl + '/'
   this.modelUrl = modelUrl // model.json的路径
   this.platform = window.navigator.platform.toLowerCase();
 
@@ -2609,7 +2584,7 @@ function live2dHelper(data,data2){
   this.lastMouseY = 0;
   this.debug = debug || {
     DEBUG_LOG: false,
-    DEBUG_MOUSE_LOG : false,
+    DEBUG_MOUSE_LOG: false,
   }
   this.binding = binding || {}
   this.isModelShown = false;
@@ -2619,31 +2594,31 @@ function live2dHelper(data,data2){
   this.interval = interval || 15000  // 自动播放间隔
   this.idle = idle || 'idle'
   this.layout = layout
-  this.globalollowPointer = typeof globalollowPointer === 'boolean'?globalollowPointer: false
-  this.scaling = typeof scaling === 'boolean'?scaling: false
+  this.globalollowPointer = typeof globalollowPointer === 'boolean' ? globalollowPointer : false
+  this.scaling = typeof scaling === 'boolean' ? scaling : false
   this.autoLoadAudio = autoLoadAudio
   this.audio = document.createElement("audio");
   this.view = {
-    VIEW_MAX_SCALE : 2,
-    VIEW_MIN_SCALE : 0.8,
-    VIEW_LOGICAL_LEFT : -1,
-    VIEW_LOGICAL_RIGHT : 1,
-    VIEW_LOGICAL_MAX_LEFT : -2,
-    VIEW_LOGICAL_MAX_RIGHT : 2,
-    VIEW_LOGICAL_MAX_BOTTOM : -2,
-    VIEW_LOGICAL_MAX_TOP : 2
+    VIEW_MAX_SCALE: 2,
+    VIEW_MIN_SCALE: 0.8,
+    VIEW_LOGICAL_LEFT: -1,
+    VIEW_LOGICAL_RIGHT: 1,
+    VIEW_LOGICAL_MAX_LEFT: -2,
+    VIEW_LOGICAL_MAX_RIGHT: 2,
+    VIEW_LOGICAL_MAX_BOTTOM: -2,
+    VIEW_LOGICAL_MAX_TOP: 2
   }
   // this.startRandomMotion = startRandomMotion
   // this.startMotion = startMotion
-  if(view){
-    for(let key in this.view){
-      if(view[key]){
+  if (view) {
+    for (let key in this.view) {
+      if (view[key]) {
         this.view[key] = view[key]
       }
     }
   }
   this.clearTexture()
-  this.initL2dCanvas(width,height)
+  this.initL2dCanvas(width, height)
   this.initModel()
   this.initLive2d()
   this.canvas.live2d = this
@@ -2669,9 +2644,9 @@ live2dHelper.prototype.initLive2d = function () {
 
 
   this.viewMatrix.setMaxScreenRect(this.view.VIEW_LOGICAL_MAX_LEFT,
-                                   this.view.VIEW_LOGICAL_MAX_RIGHT,
-                                   this.view.VIEW_LOGICAL_MAX_BOTTOM,
-                                   this.view.VIEW_LOGICAL_MAX_TOP);
+    this.view.VIEW_LOGICAL_MAX_RIGHT,
+    this.view.VIEW_LOGICAL_MAX_BOTTOM,
+    this.view.VIEW_LOGICAL_MAX_TOP);
 
   this.viewMatrix.setMaxScale(this.view.VIEW_MAX_SCALE);
   this.viewMatrix.setMinScale(this.view.VIEW_MIN_SCALE);
@@ -2688,8 +2663,8 @@ live2dHelper.prototype.initLive2d = function () {
 
   this.gl = this.getWebGLContext();
   if (!this.gl) {
-      l2dError("Failed to create WebGL context.");
-      return;
+    l2dError("Failed to create WebGL context.");
+    return;
   }
 
   Live2D.setGL(this.gl);
@@ -2714,425 +2689,406 @@ live2dHelper.prototype.throttle = function (handle, wait) {
 
 }
 
-live2dHelper.prototype.initL2dCanvas = function (obj, width, height) {
-  this.canvas.setAttribute('width',this.canvas.getAttribute('width') || width || 500)
-  this.canvas.setAttribute('height',this.canvas.getAttribute('height') || height || 500)
+live2dHelper.prototype.initL2dCanvas = function (width, height) {
+  this.canvas.setAttribute('width', this.canvas.getAttribute('width') || width || 500)
+  this.canvas.setAttribute('height', this.canvas.getAttribute('height') || height || 500)
   var self = this
-  if(this.canvas.addEventListener) {
-      if(this.globalollowPointer){
-        document.documentElement.addEventListener("mousemove",this.throttle(function(e){
-          self.mouseEvent(e)
-        },50), false);
-      } else {
-        this.canvas.addEventListener("mousemove", this.mouseEvent.bind(this), false);
-        this.canvas.addEventListener("mouseout", this.mouseEvent.bind(this), false);
-      }
-      if(this.scaling){
-        this.canvas.addEventListener("mousewheel", this.mouseEvent.bind(this), false);
-      }
-      this.canvas.addEventListener("click", this.mouseEvent.bind(this), false);
-      this.canvas.addEventListener("mousedown", this.mouseEvent.bind(this), false);
-      this.canvas.addEventListener("mouseup", this.mouseEvent.bind(this), false);
-      this.canvas.addEventListener("contextmenu", this.mouseEvent.bind(this), false);
+  if (this.canvas.addEventListener) {
+    if (this.globalollowPointer) {
+      document.documentElement.addEventListener("mousemove", this.throttle(function (e) {
+        self.mouseEvent(e)
+      }, 50), false);
+    } else {
+      this.canvas.addEventListener("mousemove", this.mouseEvent.bind(this), false);
+      this.canvas.addEventListener("mouseout", this.mouseEvent.bind(this), false);
+    }
+    if (this.scaling) {
+      this.canvas.addEventListener("mousewheel", this.mouseEvent.bind(this), false);
+    }
+    this.canvas.addEventListener("click", this.mouseEvent.bind(this), false);
+    this.canvas.addEventListener("mousedown", this.mouseEvent.bind(this), false);
+    this.canvas.addEventListener("mouseup", this.mouseEvent.bind(this), false);
+    this.canvas.addEventListener("contextmenu", this.mouseEvent.bind(this), false);
 
 
-      this.canvas.addEventListener("touchstart", this.touchEvent.bind(this), false);
-      this.canvas.addEventListener("touchend", this.touchEvent.bind(this), false);
-      this.canvas.addEventListener("touchmove", this.touchEvent.bind(this), false);
+    this.canvas.addEventListener("touchstart", this.touchEvent.bind(this), false);
+    this.canvas.addEventListener("touchend", this.touchEvent.bind(this), false);
+    this.canvas.addEventListener("touchmove", this.touchEvent.bind(this), false);
   }
 }
-live2dHelper.prototype.mouseEvent = function(e)
-{
+live2dHelper.prototype.mouseEvent = function (e) {
   e.preventDefault();
   if (e.type == "mousewheel") {
-      if (e.clientX < 0 || this.canvas.clientWidth < e.clientX ||
-      e.clientY < 0 || this.canvas.clientHeight < e.clientY)
-      {
-          return;
-      }
-      if (e.wheelDelta > 0) this.modelScaling(1.1);
-      else this.modelScaling(0.9);
+    if (e.clientX < 0 || this.canvas.clientWidth < e.clientX ||
+      e.clientY < 0 || this.canvas.clientHeight < e.clientY) {
+      return;
+    }
+    if (e.wheelDelta > 0) this.modelScaling(1.1);
+    else this.modelScaling(0.9);
   } else if (e.type == "mousedown") {
-      this.modelTurnHead(e);
+    this.modelTurnHead(e);
   } else if (e.type == "mousemove") {
-      this.followPointer(e);
+    this.followPointer(e);
   } else if (e.type == "mouseup") {
-      this.lookFront();
+    this.lookFront();
   } else if (e.type == "mouseout") {
-      this.lookFront();
+    this.lookFront();
   }
 }
-live2dHelper.prototype.touchEvent = function(e)
-{
+live2dHelper.prototype.touchEvent = function (e) {
   e.preventDefault();
 
   var touch = e.touches[0];
 
   if (e.type == "touchstart") {
-      if (e.touches.length == 1) this.modelTurnHead(touch);
+    if (e.touches.length == 1) this.modelTurnHead(touch);
   } else if (e.type == "touchmove") {
-      this.followPointer(touch);
-      if (e.touches.length == 2) {
-          var touch1 = e.touches[0];
-          var touch2 = e.touches[1];
-          var len = Math.pow(touch1.pageX - touch2.pageX, 2) + Math.pow(touch1.pageY - touch2.pageY, 2);
-          if (thisRef.oldLen - len < 0) this.modelScaling(1.025);
-          else this.modelScaling(0.975);
+    this.followPointer(touch);
+    if (e.touches.length == 2) {
+      var touch1 = e.touches[0];
+      var touch2 = e.touches[1];
+      var len = Math.pow(touch1.pageX - touch2.pageX, 2) + Math.pow(touch1.pageY - touch2.pageY, 2);
+      if (thisRef.oldLen - len < 0) this.modelScaling(1.025);
+      else this.modelScaling(0.975);
 
-          thisRef.oldLen = len;
-      }
+      thisRef.oldLen = len;
+    }
 
   } else if (e.type == "touchend") {
-      this.lookFront();
+    this.lookFront();
   }
 }
-live2dHelper.prototype.transformViewX = function( deviceX)
-{
-    var screenX = this.deviceToScreen.transformX(deviceX);
-    return this.viewMatrix.invertTransformX(screenX);
+live2dHelper.prototype.transformViewX = function (deviceX) {
+  var screenX = this.deviceToScreen.transformX(deviceX);
+  return this.viewMatrix.invertTransformX(screenX);
 }
 
 
-live2dHelper.prototype.transformViewY = function( deviceY)
-{
-    var screenY = this.deviceToScreen.transformY(deviceY);
-    return this.viewMatrix.invertTransformY(screenY);
+live2dHelper.prototype.transformViewY = function (deviceY) {
+  var screenY = this.deviceToScreen.transformY(deviceY);
+  return this.viewMatrix.invertTransformY(screenY);
 }
 
 
-live2dHelper.prototype.transformScreenX = function( deviceX)
-{
+live2dHelper.prototype.transformScreenX = function (deviceX) {
   return this.deviceToScreen.transformX(deviceX);
 }
 
 
-live2dHelper.prototype.transformScreenY = function( deviceY)
-{
-    return this.deviceToScreen.transformY(deviceY);
+live2dHelper.prototype.transformScreenY = function (deviceY) {
+  return this.deviceToScreen.transformY(deviceY);
 }
-live2dHelper.prototype.getWebGLContext = function()
-{
-    let NAMES = [ "webgl" , "experimental-webgl" , "webkit-3d" , "moz-webgl"];
+live2dHelper.prototype.getWebGLContext = function () {
+  let NAMES = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"];
 
-    for( let i = 0; i < NAMES.length; i++ ){
-        try{
-            let ctx = this.canvas.getContext(NAMES[i], {premultipliedAlpha : true});
-            if(ctx) return ctx;
-        }
-        catch(e){}
+  for (let i = 0; i < NAMES.length; i++) {
+    try {
+      let ctx = this.canvas.getContext(NAMES[i], { premultipliedAlpha: true });
+      if (ctx) return ctx;
     }
-    return null;
+    catch (e) { }
+  }
+  return null;
 }
 
-live2dHelper.prototype.followPointer = function(event)
-{
-    var rect = event.target.getBoundingClientRect();
+live2dHelper.prototype.followPointer = function (event) {
+  var rect = event.target.getBoundingClientRect();
 
-    var sx = this.transformScreenX(event.clientX - rect.left);
-    var sy = this.transformScreenY(event.clientY - rect.top);
-    var vx = this.transformViewX(event.clientX - rect.left);
-    var vy = this.transformViewY(event.clientY - rect.top);
+  var sx = this.transformScreenX(event.clientX - rect.left);
+  var sy = this.transformScreenY(event.clientY - rect.top);
+  var vx = this.transformViewX(event.clientX - rect.left);
+  var vy = this.transformViewY(event.clientY - rect.top);
 
-    if (this.debug.DEBUG_MOUSE_LOG)
-        console.log("onMouseMove device( x:" + event.clientX + " y:" + event.clientY + " ) view( x:" + vx + " y:" + vy + ")");
-    if (this.drag || this.globalollowPointer)
-    {
-      this.lastMouseX = sx;
-      this.lastMouseY = sy;
-
-      this.dragMgr.setPoint(vx, vy);
-    }
-}
-
-live2dHelper.prototype.lookFront = function()
-{
-    if (this.drag)
-    {
-      this.drag = false;
-    }
-
-    this.dragMgr.setPoint(0, 0);
-}
-
-live2dHelper.prototype.modelTurnHead = function(event)
-{
-    this.drag = true;
-
-    var rect = event.target.getBoundingClientRect();
-
-    var sx = this.transformScreenX(event.clientX - rect.left);
-    var sy = this.transformScreenY(event.clientY - rect.top);
-    var vx = this.transformViewX(event.clientX - rect.left);
-    var vy = this.transformViewY(event.clientY - rect.top);
-    if (this.debug.DEBUG_MOUSE_LOG)
-        console.log("onMouseDown device( x:" + event.clientX + " y:" + event.clientY + " ) view( x:" + vx + " y:" + vy + ")");
-
+  if (this.debug.DEBUG_MOUSE_LOG)
+    console.log("onMouseMove device( x:" + event.clientX + " y:" + event.clientY + " ) view( x:" + vx + " y:" + vy + ")");
+  if (this.drag || this.globalollowPointer) {
     this.lastMouseX = sx;
     this.lastMouseY = sy;
+
     this.dragMgr.setPoint(vx, vy);
+  }
+}
 
-    // 遍历所有可点击区域
-    if(this.model.modelSetting.json.hit_areas){
-      for (let item of this.model.modelSetting.json.hit_areas) {
-        if (this.model.hitTest(item.name, vx, vy)) {
-          let motion
-          let motionName
-          let callback
-          if(typeof item.motion === 'string' || Array.isArray(item.motion)){ // 优先选择model.json定义的motion
-            motion = item.motion
-          } else if(typeof this.binding[item.name] === 'string' || Array.isArray(this.binding[item.name])){
-            motion = this.binding[item.name]
-          }
-          if(!motion && typeof item.motion === 'object') {
-            motion = item.motion.motion
-          } else if(!motion && typeof this.binding[item.name] === 'object'){
-            motion = this.binding[item.name].motion
-          }
+live2dHelper.prototype.lookFront = function () {
+  if (this.drag) {
+    this.drag = false;
+  }
 
-          if(typeof this.binding[item.name] === 'function' || typeof this.binding[item.name] === 'object'){// 优先选择binding定义的callback
-            callback = typeof this.binding[item.name].callback === 'function' ? this.binding[item.name].callback : this.binding[item.name]
-          }
+  this.dragMgr.setPoint(0, 0);
+}
 
-          if(Array.isArray(motion)){
-            motionName = motion[parseInt(Math.random() * motion.length)]
-          } else if(typeof motion === 'string') {
-            motionName = motion
-          }
+live2dHelper.prototype.modelTurnHead = function (event) {
+  this.drag = true;
 
-          if (this.debug.DEBUG_LOG) {
-            console.log('Click on the ' + item.name)
-          }
-          if(motionName){
-            this.model.startRandomMotion(motionName,2,name,callback);
-            if (this.debug.DEBUG_LOG) {
-              console.log('Start motion name: ' + motionName)
-            }
-          }
-          break
+  var rect = event.target.getBoundingClientRect();
+
+  var sx = this.transformScreenX(event.clientX - rect.left);
+  var sy = this.transformScreenY(event.clientY - rect.top);
+  var vx = this.transformViewX(event.clientX - rect.left);
+  var vy = this.transformViewY(event.clientY - rect.top);
+  if (this.debug.DEBUG_MOUSE_LOG)
+    console.log("onMouseDown device( x:" + event.clientX + " y:" + event.clientY + " ) view( x:" + vx + " y:" + vy + ")");
+
+  this.lastMouseX = sx;
+  this.lastMouseY = sy;
+  this.dragMgr.setPoint(vx, vy);
+
+  // 遍历所有可点击区域
+  if (this.model.modelSetting.json.hit_areas) {
+    for (let item of this.model.modelSetting.json.hit_areas) {
+      if (this.model.hitTest(item.name, vx, vy)) {
+        let motion
+        let motionName
+        let callback
+        if (typeof item.motion === 'string' || Array.isArray(item.motion)) { // 优先选择model.json定义的motion
+          motion = item.motion
+        } else if (typeof this.binding[item.name] === 'string' || Array.isArray(this.binding[item.name])) {
+          motion = this.binding[item.name]
         }
-      }
-    } else {
-      // 自定义点击区域判定
-      // hit_areas_custom:{
-      //   head_x: [-0.35, 0.6],
-      //   head_y: [0.19, -0.2],
-      //   body_x: [-0.3, -0.25],
-      //   body_y: [0.3, -0.9],
-      //   binding
-      // }
-      for (let name in this.model.modelSetting.json.hit_areas_custom_data) {
-        let item = this.model.modelSetting.json.hit_areas_custom_data[name]
-        if(item.x[0]<vx&&item.x[1]>vy&&item.y[0]>vx&&item.y[1]<vy){// 点击命中自定义区域
-          let motion
-          let motionName
-          let callback
-          // if(obj.model.modelSetting.json.hit_areas_custom_data.binding[name]){
-          //   let tmp = obj.model.modelSetting.json.hit_areas_custom_data.binding[name]
-          //   // 首先检查model.json中是否绑定了motion
-          //   if(Array.isArray(tmp)){
-          //     motionName = tmp[parseInt(Math.random() * obj.binding[name].length)]
-          //   } else {
-          //     motionName = tmp
-          //   }
-          // } else if(obj.binding[name]){
-          //   if(Array.isArray(obj.binding[name])){
-          //     motionName = obj.binding[name][parseInt(Math.random() * obj.binding[name].length)]
-          //   } else {
-          //     motionName = obj.binding[name]
-          //   }
-          // }
-          let tmp = this.model.modelSetting.json.hit_areas_custom.binding[name]
-          if(typeof tmp === 'string' || Array.isArray(tmp)){ // 优先选择model.json定义的motion
-            motion = tmp
-          } else if(typeof this.binding[name] === 'string' || Array.isArray(this.binding[name])){
-            motion = this.binding[name]
-          }
-          if(!motion && typeof tmp === 'object') {
-            motion = tmp.motion
-          } else if(!motion && typeof this.binding[name] === 'object'){
-            motion = this.binding[name].motion
-          }
-
-          if(typeof this.binding[name] === 'function' || typeof this.binding[name] === 'object'){// 优先选择binding定义的callback
-            callback = typeof this.binding[name].callback === 'function' ? this.binding[name].callback : this.binding[name]
-          }
-
-          if(Array.isArray(motion)){
-            motionName = motion[parseInt(Math.random() * motion.length)]
-          } else if(typeof motion === 'string') {
-            motionName = motion
-          }
-
-          if (this.debug.DEBUG_LOG) {
-            console.log('Click on the ' + name)
-          }
-          if(motionName){
-            this.model.startRandomMotion(motionName,2,name,callback);
-            if (this.debug.DEBUG_LOG) {
-              console.log('Start motion name: ' + motionName)
-            }
-          }
-          break
+        if (!motion && typeof item.motion === 'object') {
+          motion = item.motion.motion
+        } else if (!motion && typeof this.binding[item.name] === 'object') {
+          motion = this.binding[item.name].motion
         }
+
+        if (typeof this.binding[item.name] === 'function' || typeof this.binding[item.name] === 'object') {// 优先选择binding定义的callback
+          callback = typeof this.binding[item.name].callback === 'function' ? this.binding[item.name].callback : this.binding[item.name]
+        }
+
+        if (Array.isArray(motion)) {
+          motionName = motion[parseInt(Math.random() * motion.length)]
+        } else if (typeof motion === 'string') {
+          motionName = motion
+        }
+
+        if (this.debug.DEBUG_LOG) {
+          console.log('Click on the ' + item.name)
+        }
+        if (motionName) {
+          this.model.startRandomMotion(motionName, 2, name, callback);
+          if (this.debug.DEBUG_LOG) {
+            console.log('Start motion name: ' + motionName)
+          }
+        }
+        break
       }
     }
+  } else {
+    // 自定义点击区域判定
+    // hit_areas_custom:{
+    //   head_x: [-0.35, 0.6],
+    //   head_y: [0.19, -0.2],
+    //   body_x: [-0.3, -0.25],
+    //   body_y: [0.3, -0.9],
+    //   binding
+    // }
+    for (let name in this.model.modelSetting.json.hit_areas_custom_data) {
+      let item = this.model.modelSetting.json.hit_areas_custom_data[name]
+      if (item.x[0] < vx && item.x[1] > vy && item.y[0] > vx && item.y[1] < vy) {// 点击命中自定义区域
+        let motion
+        let motionName
+        let callback
+        // if(obj.model.modelSetting.json.hit_areas_custom_data.binding[name]){
+        //   let tmp = obj.model.modelSetting.json.hit_areas_custom_data.binding[name]
+        //   // 首先检查model.json中是否绑定了motion
+        //   if(Array.isArray(tmp)){
+        //     motionName = tmp[parseInt(Math.random() * obj.binding[name].length)]
+        //   } else {
+        //     motionName = tmp
+        //   }
+        // } else if(obj.binding[name]){
+        //   if(Array.isArray(obj.binding[name])){
+        //     motionName = obj.binding[name][parseInt(Math.random() * obj.binding[name].length)]
+        //   } else {
+        //     motionName = obj.binding[name]
+        //   }
+        // }
+        let tmp = this.model.modelSetting.json.hit_areas_custom.binding[name]
+        if (typeof tmp === 'string' || Array.isArray(tmp)) { // 优先选择model.json定义的motion
+          motion = tmp
+        } else if (typeof this.binding[name] === 'string' || Array.isArray(this.binding[name])) {
+          motion = this.binding[name]
+        }
+        if (!motion && typeof tmp === 'object') {
+          motion = tmp.motion
+        } else if (!motion && typeof this.binding[name] === 'object') {
+          motion = this.binding[name].motion
+        }
+
+        if (typeof this.binding[name] === 'function' || typeof this.binding[name] === 'object') {// 优先选择binding定义的callback
+          callback = typeof this.binding[name].callback === 'function' ? this.binding[name].callback : this.binding[name]
+        }
+
+        if (Array.isArray(motion)) {
+          motionName = motion[parseInt(Math.random() * motion.length)]
+        } else if (typeof motion === 'string') {
+          motionName = motion
+        }
+
+        if (this.debug.DEBUG_LOG) {
+          console.log('Click on the ' + name)
+        }
+        if (motionName) {
+          this.model.startRandomMotion(motionName, 2, name, callback);
+          if (this.debug.DEBUG_LOG) {
+            console.log('Start motion name: ' + motionName)
+          }
+        }
+        break
+      }
+    }
+  }
 }
 
 
-live2dHelper.prototype.modelScaling = function(scale)
-{
-    var isMaxScale = this.viewMatrix.isMaxScale();
-    var isMinScale = this.viewMatrix.isMinScale();
+live2dHelper.prototype.modelScaling = function (scale) {
+  var isMaxScale = this.viewMatrix.isMaxScale();
+  var isMinScale = this.viewMatrix.isMinScale();
 
-    this.viewMatrix.adjustScale(0, 0, scale);
+  this.viewMatrix.adjustScale(0, 0, scale);
 
 
-    if (!isMaxScale)
-    {
-        if (this.viewMatrix.isMaxScale())
-        {
-            // obj.model.startRandomMotion();
-            // 放到最大时的mation
-            if (this.debug.DEBUG_LOG)
-                console.log('isMaxScale')
-        }
+  if (!isMaxScale) {
+    if (this.viewMatrix.isMaxScale()) {
+      // obj.model.startRandomMotion();
+      // 放到最大时的mation
+      if (this.debug.DEBUG_LOG)
+        console.log('isMaxScale')
     }
+  }
 
-    if (!isMinScale)
-    {
-        if (this.viewMatrix.isMinScale())
-        {
-            //obj.model.startRandomMotion(LAppDefine.MOTION_GROUP_PINCH_OUT,LAppDefine.PRIORITY_NORMAL);
-            // 缩到最小时的mation
-            if (this.debug.DEBUG_LOG)
-                console.log('isMinScale')
-        }
+  if (!isMinScale) {
+    if (this.viewMatrix.isMinScale()) {
+      //obj.model.startRandomMotion(LAppDefine.MOTION_GROUP_PINCH_OUT,LAppDefine.PRIORITY_NORMAL);
+      // 缩到最小时的mation
+      if (this.debug.DEBUG_LOG)
+        console.log('isMinScale')
     }
+  }
 }
-live2dHelper.prototype.startDraw = function() {
+live2dHelper.prototype.startDraw = function () {
   var self = this
-    if(!this.isDrawStart) {
-      this.isDrawStart = true;
-        (function tick() {
-                self.draw();
+  if (!this.isDrawStart) {
+    this.isDrawStart = true;
+    (function tick() {
+      self.draw();
 
-                var requestAnimationFrame =
-                    window.requestAnimationFrame ||
-                    window.mozRequestAnimationFrame ||
-                    window.webkitRequestAnimationFrame ||
-                    window.msRequestAnimationFrame;
+      var requestAnimationFrame =
+        window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.msRequestAnimationFrame;
 
 
-                requestAnimationFrame(tick ,self.canvas);   // 浏览器api 自定义重绘方法
-        })();
-    }
+      requestAnimationFrame(tick, self.canvas);   // 浏览器api 自定义重绘方法
+    })();
+  }
 }
 
-live2dHelper.prototype.draw = function()
-{
-    // l2dLog("--> draw()");
+live2dHelper.prototype.draw = function () {
+  // l2dLog("--> draw()");
 
-    MatrixStack.reset();
-    MatrixStack.loadIdentity();
+  MatrixStack.reset();
+  MatrixStack.loadIdentity();
 
-    this.dragMgr.update();
-    // obj.live2DMgr.setDrag(obj.dragMgr.getX(), obj.dragMgr.getY());
-    this.model.setDrag(this.dragMgr.getX(), this.dragMgr.getY());
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+  this.dragMgr.update();
+  // obj.live2DMgr.setDrag(obj.dragMgr.getX(), obj.dragMgr.getY());
+  this.model.setDrag(this.dragMgr.getX(), this.dragMgr.getY());
+  this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-    MatrixStack.multMatrix(this.projMatrix.getArray());
-    MatrixStack.multMatrix(this.viewMatrix.getArray());
-    MatrixStack.push();
+  MatrixStack.multMatrix(this.projMatrix.getArray());
+  MatrixStack.multMatrix(this.viewMatrix.getArray());
+  MatrixStack.push();
 
-    let model = this.model;
-    if(model == null) return;
+  let model = this.model;
+  if (model == null) return;
 
-    if (model.initialized && !model.updating)
-    {
-        model.update();
-        model.draw(this.gl);
-    }
+  if (model.initialized && !model.updating) {
+    model.update();
+    model.draw(this.gl);
+  }
 
-    MatrixStack.pop();
+  MatrixStack.pop();
 }
 
-live2dHelper.prototype.initModel = function(){
+live2dHelper.prototype.initModel = function () {
   var self = this
   this.model = new LAppModel(this);
   Live2D.init();
   Live2DFramework.setPlatformManager(new PlatformManager);
   this.model.load(this.gl, {
-    modelSettingPath:this.modelUrl?this.modelUrl:this.baseUrl+'model.json',
-    modelHomeDir:this.baseUrl
-  },function(){
+    modelSettingPath: this.modelUrl ? this.modelUrl : this.baseUrl + 'model.json',
+    modelHomeDir: this.baseUrl
+  }, function () {
     self.initHit_areas_custom()
     self.loadAudio()
-    if(typeof self.initModelCallback == 'function'){
+    if (typeof self.initModelCallback == 'function') {
       self.initModelCallback(self)
     }
   });
 }
 
-live2dHelper.prototype.initHit_areas_custom = function(){
-  if(this.model.modelSetting.json.hit_areas_custom) {
-      // 自定义点击区域
-      // hit_areas_custom
-      // 初始化
-      this.model.modelSetting.json.hit_areas_custom_data = {}
-      for (let name in this.model.modelSetting.json.hit_areas_custom) {
-        if(name === 'binding') continue
-        let info = name.match(/(.*)?_(x|y)$/)
-        if(!this.model.modelSetting.json.hit_areas_custom_data[info[1]]){
-          this.model.modelSetting.json.hit_areas_custom_data[info[1]] = {}
-        }
-        othisbj.model.modelSetting.json.hit_areas_custom_data[info[1]][info[2]] = this.model.modelSetting.json.hit_areas_custom[name]
+live2dHelper.prototype.initHit_areas_custom = function () {
+  if (this.model.modelSetting.json.hit_areas_custom) {
+    // 自定义点击区域
+    // hit_areas_custom
+    // 初始化
+    this.model.modelSetting.json.hit_areas_custom_data = {}
+    for (let name in this.model.modelSetting.json.hit_areas_custom) {
+      if (name === 'binding') continue
+      let info = name.match(/(.*)?_(x|y)$/)
+      if (!this.model.modelSetting.json.hit_areas_custom_data[info[1]]) {
+        this.model.modelSetting.json.hit_areas_custom_data[info[1]] = {}
       }
+      othisbj.model.modelSetting.json.hit_areas_custom_data[info[1]][info[2]] = this.model.modelSetting.json.hit_areas_custom[name]
     }
+  }
 }
-live2dHelper.prototype.startRandomMotion = function(motionName,priority){
-  this.model.startRandomMotion(motionName,priority)
+live2dHelper.prototype.startRandomMotion = function (motionName, priority) {
+  this.model.startRandomMotion(motionName, priority)
 }
-live2dHelper.prototype.startMotion = function(motionName,no,priority){
-  this.model.startMotion(motionName,no,priority)
+live2dHelper.prototype.startMotion = function (motionName, no, priority) {
+  this.model.startMotion(motionName, no, priority)
 }
-live2dHelper.prototype.clearTexture = function(){
-  if(this.canvas.live2d){
+live2dHelper.prototype.clearTexture = function () {
+  if (this.canvas.live2d) {
     this.canvas.live2d.model.release(this.canvas.live2d.gl)
     clearInterval(this.canvas.live2d.model.timmer)
     this.canvas.live2d.audio.pause()
     delete this.canvas.live2d
   }
 }
-live2dHelper.prototype.loadAudio = function(){
-  if(this.autoLoadAudio !== false){
+live2dHelper.prototype.loadAudio = function () {
+  var self = this
+  if (this.autoLoadAudio !== false) {
     let motions = this.model.modelSetting.json.motions
     let sounds = []
-    for(let motionName in motions){
-      for(let item of motions[motionName]){
-        if(item.sound){
-          if(Array.isArray(item.sound)){
-            item.sound.forEach(function(sound){
-              if(!sounds.includes(this.baseUrl + sound)){
-                sounds.push(this.baseUrl + sound)
+    for (let motionName in motions) {
+      for (let item of motions[motionName]) {
+        if (item.sound) {
+          if (Array.isArray(item.sound)) {
+            item.sound.forEach((sound) => {
+              if (!sounds.includes(self.baseUrl + sound)) {
+                sounds.push(self.baseUrl + sound)
               }
             })
-          }else{
-            if(!sounds.includes(this.baseUrl + item.sound)){
-              sounds.push(this.baseUrl + item.sound)
+          } else {
+            if (!sounds.includes(self.baseUrl + item.sound)) {
+              sounds.push(self.baseUrl + item.sound)
             }
           }
         }
       }
     }
     let i = 0
-    let load = function(){
-      if(i >= sounds.length) {
-        if (typeof obj.autoLoadAudio == "function") obj.autoLoadAudio();
+    let load = function () {
+      if (i >= sounds.length) {
+        if (typeof self.autoLoadAudio == "function") self.autoLoadAudio();
         return
       }
       let tmpAudio = document.createElement("audio");
       tmpAudio.src = sounds[i]
-      tmpAudio.oncanplaythrough = function(){
+      tmpAudio.oncanplaythrough = function () {
         i++;
         load()
       }

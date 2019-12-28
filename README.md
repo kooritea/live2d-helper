@@ -48,7 +48,7 @@ loadLive2d({
   baseUrl: './model/kaguya', // 资源原始路径
   modelUrl: './model/kaguya/model.json', // 自定义model.json路径 方便用于一键换装
   crossOrigin: false, // 是否允许跨域获取数据(前提是http header中已有允许的跨域字段) def:false
-  interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
+  interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔,有语音的话从语音播放结束开始计算
   idle: 'idle', // 自动触发的mation
   width: "800", // html上的width属性优先级更高
   height: "800",// html上的height属性优先级更高
@@ -87,7 +87,7 @@ loadLive2d({
     belly: 'tap_belly',
     leg: function(){console.log('hentai!')}
   },
-  autoLoadAudio:function(){console.log('audio loaded')}, // 自动下载音频 def：true
+  autoLoadAudio:function(){console.log('audio loaded')}, // 自动下载音频 def：true,设置为false时不自动加载音频
   initModelCallback(waifu){
     console.log(waifu)
     console.log('加载完毕')
