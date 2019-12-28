@@ -2115,7 +2115,8 @@ function LAppModel(obj) {
     this.obj = obj
     this.nextStartRandomMotion = () => {
         if (this.obj.interval) {
-            setTimeout(() => {
+            clearTimeout(this.startRandomMotionTimer)
+            this.startRandomMotionTimer = setTimeout(() => {
                 this.startRandomMotion(this.obj.idle, 1);
             }, this.obj.interval)
         }
@@ -2143,7 +2144,7 @@ LAppModel.prototype.load = function (gl, loadPath, callback) {
         thisRef.loadModelData(path, function (model) {
 
             for (var i = 0; i < thisRef.modelSetting.getTextureNum(); i++) {
-                var texPaths = thisRef.modelHomeDir +
+                var texPaths = thisRef.obj.imageUrl +
                     thisRef.modelSetting.getTextureFile(i);
                 thisRef.loadTexture(i, texPaths, thisRef.obj, function () {
 
@@ -2479,20 +2480,25 @@ LAppModel.prototype.setFadeInFadeOut = function (name, no, priority, motion) {
         } else {
             selectSoundName = soundName;
         }
-        this.obj.audio.oncanplaythrough = () => {
-            this.obj.audio.play();
-            if (this.obj.debug.DEBUG_LOG) {
-                console.log("Start sound : " + selectSoundName);
-            }
+        if (this.obj.audioCache[soundName]) {
+            this.obj.audio.src = URL.createObjectURL(this.obj.audioCache[soundName])
             this.obj.audio.onended = () => {
                 if (this.obj.debug.DEBUG_LOG) {
                     console.log("Wait next sound ");
                 }
                 this.nextStartRandomMotion()
             }
+            this.obj.audio.play();
+        } else {
+            if (this.obj.debug.DEBUG_LOG) {
+                console.log("not cache, don't play : " + selectSoundName);
+            }
+            this.nextStartRandomMotion()
         }
-        this.obj.audio.src = this.modelHomeDir + selectSoundName;
     } else {
+        if (this.obj.debug.DEBUG_LOG) {
+            console.log("not sound ");
+        }
         this.nextStartRandomMotion()
     }
     this.mainMotionManager.startMotionPrio(motion, priority);
@@ -2551,7 +2557,7 @@ function loadLive2d(data, data2) {
 }
 
 function live2dHelper(data, data2) {
-  let { canvasId, baseUrl, modelUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalollowPointer, binding, autoLoadAudio } = data
+  let { canvasId, baseUrl, modelUrl, imageUrl, soundUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalollowPointer, binding, autoLoadAudio } = data
   if (typeof data === 'string') {
     canvasId = data
     baseUrl = data2
@@ -2560,7 +2566,11 @@ function live2dHelper(data, data2) {
     return
   }
   this.baseUrl = /\/$/.test(baseUrl) ? baseUrl : baseUrl + '/'
-  this.modelUrl = modelUrl // model.json的路径
+  this.modelUrl = modelUrl ? modelUrl : this.baseUrl + 'model.json' // model.json的路径
+  this.imageUrl = imageUrl ? imageUrl : this.baseUrl // 图片资源的路径
+  this.imageUrl = /\/$/.test(this.imageUrl) ? this.imageUrl : this.imageUrl + '/'
+  this.soundUrl = soundUrl ? soundUrl : this.baseUrl // 音频资源的路径
+  this.soundUrl = /\/$/.test(this.soundUrl) ? this.soundUrl : this.soundUrl + '/'
   this.platform = window.navigator.platform.toLowerCase();
 
   // obj.live2DMgr = new LAppLive2DManager(); 只用来管理多个模型现在不需要
@@ -2598,6 +2608,7 @@ function live2dHelper(data, data2) {
   this.scaling = typeof scaling === 'boolean' ? scaling : false
   this.autoLoadAudio = autoLoadAudio
   this.audio = document.createElement("audio");
+  this.audioCache = {}
   this.view = {
     VIEW_MAX_SCALE: 2,
     VIEW_MIN_SCALE: 0.8,
@@ -3068,17 +3079,26 @@ live2dHelper.prototype.loadAudio = function () {
         if (item.sound) {
           if (Array.isArray(item.sound)) {
             item.sound.forEach((sound) => {
-              if (!sounds.includes(self.baseUrl + sound)) {
-                sounds.push(self.baseUrl + sound)
+              if (!sounds.includes(sound)) {
+                sounds.push(sound)
               }
             })
           } else {
-            if (!sounds.includes(self.baseUrl + item.sound)) {
-              sounds.push(self.baseUrl + item.sound)
+            if (!sounds.includes(item.sound)) {
+              sounds.push(item.sound)
             }
           }
         }
       }
+    }
+    let getAudioBlob = (url, callback) => {
+      let xhr = new XMLHttpRequest();
+      xhr.open('get', url);
+      xhr.responseType = 'blob';
+      xhr.onload = function () {
+        callback(this.response);
+      }
+      xhr.send();
     }
     let i = 0
     let load = function () {
@@ -3086,12 +3106,11 @@ live2dHelper.prototype.loadAudio = function () {
         if (typeof self.autoLoadAudio == "function") self.autoLoadAudio();
         return
       }
-      let tmpAudio = document.createElement("audio");
-      tmpAudio.src = sounds[i]
-      tmpAudio.oncanplaythrough = function () {
+      getAudioBlob(self.soundUrl + sounds[i], (data) => {
+        self.audioCache[sounds[i]] = data
         i++;
         load()
-      }
+      })
     }
     load()
   }

@@ -18,9 +18,12 @@
   <script type="text/javascript">
     loadLive2d({
       canvasId: 'live2d',
-      baseUrl: './model/kaguya',
-      modelUrl: './model/kaguya/model.json',
-      crossOrigin: false, // 是否允许跨域获取数据(前提是http header中已有允许的跨域字段) def:false
+      baseUrl: 'https://cdn.jsdelivr.net/gh/kooritea/kooritea.github.io/live2d/kaguya',
+      modelUrl: 'https://cdn.jsdelivr.net/gh/kooritea/kooritea.github.io/live2d/kaguya/model.json',
+      imageUrl: 'https://cdn.jsdelivr.net/gh/kooritea/kooritea.github.io/live2d/kaguya',
+      // soundUrl: 'https://www.kooritea.cc/live2d/kaguya',
+      soundUrl: './model/kaguya',
+      crossOrigin: true, // 是否允许跨域获取数据(前提是http header中已有允许的跨域字段) def:false
       interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
       idle: 'idle', // 自动触发的mation
       width: "800", // html上的width属性优先级更高
