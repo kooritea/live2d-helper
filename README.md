@@ -11,6 +11,14 @@
 ```bash
 npm install live2d-helper
 ```
+
+### 准备live2d模型
+
+基本上按照demo里面那样子放置资源即可  
+这里内置的live2d.js使用的是`2.1`的版本模型  
+其他版本的模型可能不通用!  
+
+
 ### 引入 live2d-helper
 ```html
 <script src="./dist/index.js"></script>
