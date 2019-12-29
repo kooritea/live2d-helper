@@ -35,7 +35,6 @@
       imageUrl: './model/kaguya',
       soundUrl: 'https://www.kooritea.cc/live2d/kaguya',
       allowSound: true,
-      crossOrigin: false, // 是否允许跨域获取数据(前提是http header中已有允许的跨域字段) def:false
       interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
       idle: 'idle', // 自动触发的mation
       width: "400", // html上的width属性优先级更高
@@ -86,7 +85,6 @@
       canvas: 'live2d',
       baseUrl: './model/22',
       modelUrl: './model/22/model.json',
-      crossOrigin: false, // 是否允许跨域获取数据(前提是http header中已有允许的跨域字段) def:false
       interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
       idle: 'idle', // 自动触发的mation
       width: "400", // html上的width属性优先级更高
@@ -137,7 +135,7 @@
         // waifu.startRandomMotion('shake',2)
       }
     }
-    window.waifu = loadLive2d(model22)
+    window.waifu = loadLive2d(kaguya)
   </script>
 </body>
 

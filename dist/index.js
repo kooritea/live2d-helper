@@ -1962,27 +1962,25 @@ ModelSettingJson.prototype.getInitPartsVisibleValue = function(n)
 //  class PlatformManager     extend IPlatformManager
 //============================================================
 //============================================================
-function PlatformManager()
-{
+function PlatformManager() {
 
 }
 
 //============================================================
 //    PlatformManager # loadBytes()
 //============================================================
-PlatformManager.prototype.loadBytes = function(path/*String*/, callback)
-{
+PlatformManager.prototype.loadBytes = function (path/*String*/, callback) {
     var request = new XMLHttpRequest();
     request.open("GET", path, true);
     request.responseType = "arraybuffer";
-    request.onload = function(){
-        switch(request.status){
-        case 200:
-            callback(request.response);
-            break;
-        default:
-            console.error("Failed to load (" + request.status + ") : " + path);
-            break;
+    request.onload = function () {
+        switch (request.status) {
+            case 200:
+                callback(request.response);
+                break;
+            default:
+                console.error("Failed to load (" + request.status + ") : " + path);
+                break;
         }
     }
     request.send(null);
@@ -1992,10 +1990,9 @@ PlatformManager.prototype.loadBytes = function(path/*String*/, callback)
 //============================================================
 //    PlatformManager # loadString()
 //============================================================
-PlatformManager.prototype.loadString      = function(path/*String*/)
-{
+PlatformManager.prototype.loadString = function (path/*String*/) {
 
-    this.loadBytes(path, function(buf) {
+    this.loadBytes(path, function (buf) {
         return buf;
     });
 
@@ -2004,12 +2001,11 @@ PlatformManager.prototype.loadString      = function(path/*String*/)
 //============================================================
 //    PlatformManager # loadLive2DModel()
 //============================================================
-PlatformManager.prototype.loadLive2DModel = function(path/*String*/, callback)
-{
+PlatformManager.prototype.loadLive2DModel = function (path/*String*/, callback) {
     var model = null;
 
     // load moc
-    this.loadBytes(path, function(buf){
+    this.loadBytes(path, function (buf) {
         model = Live2DModelWebGL.loadModel(buf);
         callback(model);
     });
@@ -2019,16 +2015,22 @@ PlatformManager.prototype.loadLive2DModel = function(path/*String*/, callback)
 //============================================================
 //    PlatformManager # loadTexture()
 //============================================================
-PlatformManager.prototype.loadTexture     = function(model/*ALive2DModel*/, no/*int*/, path/*String*/, obj/*context*/, callback)
-{
+PlatformManager.prototype.loadTexture = function (model/*ALive2DModel*/, no/*int*/, path/*String*/, obj/*context*/, callback) {
     // load textures
     var loadedImage = new Image();
-    loadedImage.src = path;
-    if(obj.crossOrigin){
-      loadedImage.crossOrigin = 'Anonymous'
+    let getImageBlob = (url, callback) => {
+        let xhr = new XMLHttpRequest();
+        xhr.open('get', url);
+        xhr.responseType = 'blob';
+        xhr.onload = function () {
+            callback(this.response)
+        }
+        xhr.send();
     }
-    var thisRef = this;
-    loadedImage.onload = function() {
+    getImageBlob(path, (blob) => {
+        loadedImage.src = URL.createObjectURL(blob)
+    })
+    loadedImage.onload = function () {
 
         // create texture
         // var canvas = document.getElementById("glcanvas");
@@ -2036,9 +2038,9 @@ PlatformManager.prototype.loadTexture     = function(model/*ALive2DModel*/, no/*
         let canvas = obj.canvas
         let gl = obj.gl
         let texture = gl.createTexture();
-        if (!texture){ console.error("Failed to generate gl texture name."); return -1; }
+        if (!texture) { console.error("Failed to generate gl texture name."); return -1; }
 
-        if(model.isPremultipliedAlpha() == false){
+        if (model.isPremultipliedAlpha() == false) {
             // 乗算済アルファテクスチャ以外の場合
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
         }
@@ -2046,13 +2048,10 @@ PlatformManager.prototype.loadTexture     = function(model/*ALive2DModel*/, no/*
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-                      gl.UNSIGNED_BYTE, loadedImage);
+            gl.UNSIGNED_BYTE, loadedImage);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
         gl.generateMipmap(gl.TEXTURE_2D);
-
-
-
         model.setTexture(no, texture);
 
         // テクスチャオブジェクトを解放
@@ -2061,7 +2060,7 @@ PlatformManager.prototype.loadTexture     = function(model/*ALive2DModel*/, no/*
         if (typeof callback == "function") callback();
     };
 
-    loadedImage.onerror = function() {
+    loadedImage.onerror = function () {
         console.error("Failed to load image : " + path);
     }
 }
@@ -2071,7 +2070,7 @@ PlatformManager.prototype.loadTexture     = function(model/*ALive2DModel*/, no/*
 //    PlatformManager # parseFromBytes(buf)
 
 //============================================================
-PlatformManager.prototype.jsonParseFromBytes = function(buf){
+PlatformManager.prototype.jsonParseFromBytes = function (buf) {
 
     var jsonStr;
 
@@ -2093,8 +2092,7 @@ PlatformManager.prototype.jsonParseFromBytes = function(buf){
 //============================================================
 //    PlatformManager # log()
 //============================================================
-PlatformManager.prototype.log  = function(txt/*String*/)
-{
+PlatformManager.prototype.log = function (txt/*String*/) {
     console.log(txt);
 }
 
