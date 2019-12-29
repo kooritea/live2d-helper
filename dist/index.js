@@ -2470,10 +2470,8 @@ LAppModel.prototype.setFadeInFadeOut = function (name, no, priority, motion) {
 
     if (this.obj.debug.DEBUG_LOG)
         console.log("Start motion : " + motionName);
-
-    if (this.modelSetting.getMotionSound(name, no)) {
+    if (this.modelSetting.getMotionSound(name, no) && this.obj.allowSound) {
         var soundName = this.modelSetting.getMotionSound(name, no);
-        // var player = new Sound(this.modelHomeDir + soundName);
         let selectSoundName
         if (Array.isArray(soundName)) {
             selectSoundName = soundName[parseInt(Math.random() * soundName.length)];
@@ -2557,12 +2555,13 @@ function loadLive2d(data, data2) {
 }
 
 function live2dHelper(data, data2) {
-  let { canvasId, baseUrl, modelUrl, imageUrl, soundUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalollowPointer, binding, autoLoadAudio } = data
-  if (typeof data === 'string') {
-    canvasId = data
+  let { canvas, baseUrl, modelUrl, imageUrl, soundUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalFollowPointer, binding, autoLoadAudio, allowSound } = data
+  if (typeof data === 'string' || data instanceof HTMLElement) {
+    canvas = data
     baseUrl = data2
   }
-  if (!canvasId || !baseUrl) {
+  if (!canvas || !baseUrl) {
+    console.error('Not Found canvas or baseUrl')
     return
   }
   this.baseUrl = /\/$/.test(baseUrl) ? baseUrl : baseUrl + '/'
@@ -2580,7 +2579,7 @@ function live2dHelper(data, data2) {
   this.isDrawStart = false;
 
   this.gl = null;
-  this.canvas = document.getElementById(canvasId);
+  this.canvas = canvas instanceof HTMLElement ? canvas : document.getElementById(canvas)
 
   this.crossOrigin = crossOrigin
   this.dragMgr = null; /*new L2DTargetPoint();*/
@@ -2604,9 +2603,10 @@ function live2dHelper(data, data2) {
   this.interval = interval || 15000  // 自动播放间隔
   this.idle = idle || 'idle'
   this.layout = layout
-  this.globalollowPointer = typeof globalollowPointer === 'boolean' ? globalollowPointer : false
+  this.globalFollowPointer = typeof globalFollowPointer === 'boolean' ? globalFollowPointer : false
   this.scaling = typeof scaling === 'boolean' ? scaling : false
   this.autoLoadAudio = autoLoadAudio
+  this.allowSound = typeof allowSound === 'boolean' ? allowSound : true
   this.audio = document.createElement("audio");
   this.audioCache = {}
   this.view = {
@@ -2705,7 +2705,7 @@ live2dHelper.prototype.initL2dCanvas = function (width, height) {
   this.canvas.setAttribute('height', this.canvas.getAttribute('height') || height || 500)
   var self = this
   if (this.canvas.addEventListener) {
-    if (this.globalollowPointer) {
+    if (this.globalFollowPointer) {
       document.documentElement.addEventListener("mousemove", this.throttle(function (e) {
         self.mouseEvent(e)
       }, 50), false);
@@ -2812,7 +2812,7 @@ live2dHelper.prototype.followPointer = function (event) {
 
   if (this.debug.DEBUG_MOUSE_LOG)
     console.log("onMouseMove device( x:" + event.clientX + " y:" + event.clientY + " ) view( x:" + vx + " y:" + vy + ")");
-  if (this.drag || this.globalollowPointer) {
+  if (this.drag || this.globalFollowPointer) {
     this.lastMouseX = sx;
     this.lastMouseY = sy;
 
@@ -3051,7 +3051,7 @@ live2dHelper.prototype.initHit_areas_custom = function () {
       if (!this.model.modelSetting.json.hit_areas_custom_data[info[1]]) {
         this.model.modelSetting.json.hit_areas_custom_data[info[1]] = {}
       }
-      othisbj.model.modelSetting.json.hit_areas_custom_data[info[1]][info[2]] = this.model.modelSetting.json.hit_areas_custom[name]
+      this.model.modelSetting.json.hit_areas_custom_data[info[1]][info[2]] = this.model.modelSetting.json.hit_areas_custom[name]
     }
   }
 }

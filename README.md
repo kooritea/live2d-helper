@@ -38,23 +38,25 @@ import loadLive2d from 'live2d-helper'
 html
 
 ```html
-<canvas id="canvasId"></canvas>
+<canvas id="live2d"></canvas>
 ```
 javascript
 
 ```javascript
+// 除了canvas和baseUrl选项都是选填
 loadLive2d({
-  canvasId:'live2d', // canvas的id
+  canvas: 'live2d', // canvas的id亦可以是canvas的dom元素
   baseUrl: './model/kaguya', // 资源原始路径
   modelUrl: './model/kaguya/model.json', // 自定义model.json路径 方便用于一键换装
   imageUrl: './model/kaguya' // 图片资源的根路径，最后获取资源的实际路径是这个路径加上model.json中定义的相对路径，不填该项则默认是baseUrl
   soundUrl: './model/kaguya' // 音频资源的根路径，最后获取资源的实际路径是这个路径加上model.json中定义的相对路径，不填该项则默认是baseUrl
   crossOrigin: false, // 是否允许跨域获取数据(前提是http header中已有允许的跨域字段) def:false
+  allowSound: true, // 是否允许播放音频，如果有的话 def：true
   interval: 30000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔,有语音的话从语音播放结束开始计算
   idle: 'idle', // 自动触发的mation
   width: "800", // html上的width属性优先级更高
   height: "800",// html上的height属性优先级更高
-  globalollowPointer: false, // 老婆焦点跟随鼠标 def:false
+  globalFollowPointer: false, // 老婆焦点跟随鼠标 def:false
   scaling: true, // 是否允许使用滚轮放大缩小 def:false
   debug: {
     DEBUG_LOG: false,
@@ -89,7 +91,7 @@ loadLive2d({
     belly: 'tap_belly',
     leg: function(){console.log('hentai!')}
   },
-  autoLoadAudio:function(){console.log('audio loaded')}, // 自动下载音频 def：true,设置为false时不自动加载音频
+  autoLoadAudio:function(){console.log('audio loaded')}, // 自动下载音频 def：true,设置为false时不自动加载音频,设置为false将不会播放音频
   initModelCallback(waifu){
     console.log(waifu)
     console.log('加载完毕')
