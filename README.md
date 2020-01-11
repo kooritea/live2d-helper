@@ -2,7 +2,9 @@
 
 [![npm](https://img.shields.io/npm/v/live2d-helper.svg?style=flat)](https://www.npmjs.com/package/live2d-helper)
 
-基于官方 live2d.js 的、更加简单易用的 live2d-helper，通过简单的配置在网页上显示 live2d(waifu)
+基于官方 live2d.js(2.1) 的、更加简单易用的 live2d-helper，通过简单的配置在网页上显示 live2d(waifu)
+
+不依赖任何其他框架,你只需要一个canvas元素和模型资源地址!就可以显示!
 
 ## 如何使用
 
@@ -98,7 +100,7 @@ loadLive2d({
     VIEW_LOGICAL_MAX_BOTTOM: -2,
     VIEW_LOGICAL_MAX_TOP: 2
   },
-  binding: {
+  binding: {// 详细配置方法在下一点
     // 需要自行根据不同模型的model.json将mation绑定到对应的hit_areas 支持hit_areas_custom
     head: "flick_head",
     face: "tap_face",
@@ -119,6 +121,8 @@ loadLive2d({
 ```
 
 ## 点击区域绑定模型动作和回调函数
+
+### 想要模型有点击反馈,这步一定要做!
 
 1、在模型初始化的时候传入 binding 字段绑定
 
