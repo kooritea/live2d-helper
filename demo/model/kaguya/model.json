@@ -67,7 +67,7 @@
 		{"name":"face", "id":"D_CORE_FACE"},
 		{"name":"breast", "id":"D_CORE_BREAST"},
 		{"name":"belly", "id":"D_CORE_BELLY"},
-		{"name":"leg", "id":"D_CORE_LEG"}
+		{"name":"leg", "id":"D_CORE_LEG", "motion": "tap_leg"}
 	],
 	"motion_settings":
 	{

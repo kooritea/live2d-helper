@@ -3017,6 +3017,8 @@ live2dHelper.prototype.initBinding = function () {
       motion.push(this.binding[name])
     } else if(Array.isArray(this.binding[name])){
       motion.push(...this.binding[name])
+    } else if(typeof this.binding[name] === 'function'){
+      callback = this.binding[name]
     } else if(typeof this.binding[name] === 'object'){
       motion.push(...this.binding[name].motion)
       if(typeof this.binding[name].callback === 'function'){
