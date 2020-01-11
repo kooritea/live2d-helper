@@ -1739,15 +1739,21 @@ function ModelSettingJson()
 }
 
 
-ModelSettingJson.prototype.loadModelSetting = function(path, callback)
+ModelSettingJson.prototype.loadModelSetting = function({modelJson,modelJsonPath}, callback)
 {
     var thisRef = this;
-    var pm = Live2DFramework.getPlatformManager();
-    pm.loadBytes(path, function(buf) {
-        var str = String.fromCharCode.apply(null,new Uint8Array(buf));
-        thisRef.json = JSON.parse(str);
+    if(modelJson){
+        thisRef.json = modelJson
         callback();
-    });
+    }else{
+        var pm = Live2DFramework.getPlatformManager();
+        pm.loadBytes(modelJsonPath, function(buf) {
+            var str = String.fromCharCode.apply(null,new Uint8Array(buf));
+            thisRef.json = JSON.parse(str);
+            callback();
+        });
+    }
+    
 };
 
 
@@ -2136,7 +2142,10 @@ LAppModel.prototype.load = function (gl, loadPath, callback) {
 
     var thisRef = this;
 
-    this.modelSetting.loadModelSetting(loadPath.modelSettingPath, function () {
+    this.modelSetting.loadModelSetting({
+        modelJson: loadPath.modelSetting,
+        modelJsonPath: loadPath.modelSettingPath
+    }, function () {
 
         var path = thisRef.modelHomeDir + thisRef.modelSetting.getModelFile();
         thisRef.loadModelData(path, function (model) {
@@ -2553,7 +2562,7 @@ function loadLive2d(data, data2) {
 }
 
 function live2dHelper(data, data2) {
-  let { canvas, baseUrl, modelUrl, imageUrl, soundUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalFollowPointer, binding, autoLoadAudio, allowSound } = data
+  let { canvas, baseUrl, model, imageUrl, soundUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalFollowPointer, binding, autoLoadAudio, allowSound } = data
   if (typeof data === 'string' || data instanceof HTMLElement) {
     canvas = data
     baseUrl = data2
@@ -2563,11 +2572,21 @@ function live2dHelper(data, data2) {
     return
   }
   this.baseUrl = /\/$/.test(baseUrl) ? baseUrl : baseUrl + '/'
-  this.modelUrl = modelUrl ? modelUrl : this.baseUrl + 'model.json' // model.json的路径
   this.imageUrl = imageUrl ? imageUrl : this.baseUrl // 图片资源的路径
   this.imageUrl = /\/$/.test(this.imageUrl) ? this.imageUrl : this.imageUrl + '/'
   this.soundUrl = soundUrl ? soundUrl : this.baseUrl // 音频资源的路径
   this.soundUrl = /\/$/.test(this.soundUrl) ? this.soundUrl : this.soundUrl + '/'
+
+
+  if(typeof model === 'object'){
+    this.modelUrl = ""
+    this.modelJson = model
+  }else{
+    this.modelUrl = model && typeof model === 'string' ? model : this.baseUrl + 'model.json' // model.json的路径
+  }
+  
+
+
   this.platform = window.navigator.platform.toLowerCase();
 
   // obj.live2DMgr = new LAppLive2DManager(); 只用来管理多个模型现在不需要
@@ -3026,7 +3045,8 @@ live2dHelper.prototype.initModel = function () {
   Live2D.init();
   Live2DFramework.setPlatformManager(new PlatformManager);
   this.model.load(this.gl, {
-    modelSettingPath: this.modelUrl ? this.modelUrl : this.baseUrl + 'model.json',
+    modelSetting: this.modelJson,
+    modelSettingPath: this.modelUrl,
     modelHomeDir: this.baseUrl
   }, function () {
     self.initHit_areas_custom()

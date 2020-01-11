@@ -9,7 +9,7 @@
     "binding": {
       "head": ["thanking"],
       "body": {
-        "motion": ["tap_body","thanking"]
+        "motion": ["tap_body"]
       }
     }
 	},
