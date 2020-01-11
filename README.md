@@ -125,13 +125,17 @@ loadLive2d({
 ```javascript
 loadLive2d({
   "...": "...",
-  binding: {
+  binding: {// 其中head等点击区域可以在model.json的hit_areas或者hit_areas_custom中找到
     head: {
       motion: ["flick_head", "shake"],
-      callback: function(hitArea, motionName, name) {
-        console.log(hitArea);
-        console.log(motionName);
-        console.log(name);
+      callback: function({
+        hitArea, // 点击区域,例如`head`
+        motionPath,// 即将播放的motion地址,例如`motions/xxx.mtn`
+        motionName,// 即将播放的motion名称,例如`shake`或者`flick_head`
+        priority// 优先级,见附表
+      }) {
+        console.log(hitArea,motionPath,motionName,priority);
+        return false // 如果return false 则不会做任何动作,此次点击将被取消
       }
     },
     face: "tap_face",
@@ -177,10 +181,8 @@ loadLive2d({
     "body_x": [-0.3, -0.25],
     "body_y": [0.3, -0.9],
     "binding": {
-      "head": ["thanking"],
-      "body": {
-        "motion": ["tap_body", "thanking"]
-      }
+      "head": "thanking",
+      "body": ["tap_body", "thanking"]
     }
   },
   "...": "..."
@@ -189,7 +191,7 @@ loadLive2d({
 
 注意：
 
-model.json 中的 motion 优先级更高
+model.json和配置中的绑定会合并
 
 ### 进阶
 
