@@ -219,3 +219,23 @@ waifu.startMotion((mationName: string), (no: number), (priority: number));
 |  PRIORITY_IDLE  |   1    | 可被 2,3 打断 |
 | PRIORITY_NORMAL |   2    | 只能被 3 打断 |
 | PRIORITY_FORCE  |   3    | 只能被 3 打断 |
+
+### 同一页面放置多个模型
+
+需要等待第一个模型加载完毕再调用loadLive2d
+
+```javascript
+loadLive2d({
+  name: '22',
+  ...,
+  initModelCallback(){
+    console.log('22 loaded')
+    loadLive2d({
+      name: '33',
+      initModelCallback(){
+        console.log('22 & 33 loaded')
+      }
+    })
+  }
+})
+```

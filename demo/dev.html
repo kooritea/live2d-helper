@@ -7,6 +7,7 @@
 
   <body>
     <canvas id="live2d" class="live2d"></canvas>
+    <canvas id="live2d2" class="live2d"></canvas>
     <button
       type="button"
       onclick="waifu.startRandomMotion('shake', 2)"
@@ -23,10 +24,10 @@
     <script src="../lib/index.js"></script>
     <script type="text/javascript">
       // loadLive2d('live2d','model/hakasen')
-      let model = function(){
+      let model = function(name){
         let closet = ['closet.2018.spring','closet.2018.lover'][parseInt(Math.random()*2)]
         return {
-          "model": "22.v2.moc",
+          "model": `${name}.v2.moc`,
           "textures": [
             "texture/texture_00.png", 
             `texture/${closet}/texture_01.png`, 
@@ -47,51 +48,113 @@
             "center_x": -0.1,
             "center_y": 0,
             "width": 2.4,
-            "height": 2.4
+            "height": 2.0
           },
           "motions": {
             "idle": [{
-              "file": "motions/22.v2.idle-01.mtn",
+              "file": `motions/${name}.v2.idle-01.mtn`,
               "fade_in": 2000,
               "fade_out": 2000
             }, {
-              "file": "motions/22.v2.idle-02.mtn",
+              "file": `motions/${name}.v2.idle-02.mtn`,
               "fade_in": 2000,
               "fade_out": 2000
             }, {
-              "file": "motions/22.v2.idle-03.mtn",
+              "file": `motions/${name}.v2.idle-03.mtn`,
               "fade_in": 1000,
               "fade_out": 1000
             }],
             "tap_body": [{
-              "file": "motions/22.v2.touch.mtn",
+              "file": `motions/${name}.v2.touch.mtn`,
               "fade_in": 150,
               "fade_out": 100,
               "sound": [
-                "sound/22-1.wav",
-                "sound/22-2.wav",
-                "sound/22-3.wav",
-                "sound/22-4.wav",
-                "sound/22-5.wav",
-                "sound/22-6.wav",
-                "sound/22-7.wav",
-                "sound/22-8.wav",
-                "sound/22-9.wav",
-                "sound/22-10.wav",
-                "sound/22-drag.wav"
+                `sound/${name}-1.wav`,
+                `sound/${name}-2.wav`,
+                `sound/${name}-3.wav`,
+                `sound/${name}-4.wav`,
+                `sound/${name}-5.wav`,
+                `sound/${name}-6.wav`,
+                `sound/${name}-7.wav`,
+                `sound/${name}-8.wav`,
+                `sound/${name}-9.wav`,
+                `sound/${name}-10.wav`,
+                `sound/${name}-drag.wav`
               ]
             }],
             "thanking": [{
-              "file": "motions/22.v2.thanking.mtn",
+              "file": `motions/${name}.v2.thanking.mtn`,
               "fade_in": 2000,
               "fade_out": 2000
             }]
           }
         }
       }
-
+      window.model22 = function(){
+        return {
+          canvas: "live2d",
+          baseUrl: "./model/22",
+          model: model('22'),
+          interval: 5000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
+          idle: "idle", // 自动触发的mation
+          width: "400", // html上的width属性优先级更高
+          height: "400", // html上的height属性优先级更高
+          debug: {
+            DEBUG_LOG: true,
+            DEBUG_MOUSE_LOG: false
+          },
+          binding: {
+            head: {
+              motion: ["tap_body","shake"],
+              callback: function(options) {
+                // console.log(hitArea);
+                // console.log(motionName);
+                // console.log(name)
+                console.log("hint head callback: hentai",options);
+                // return false
+              }
+            }
+          },
+          initModelCallback(waifu){
+            window.waifu = waifu
+            console.log('22 loaded')
+            window.waifu2 = loadLive2d(model33());
+          }
+        };
+      }
+      window.model33 = function(){
+        return {
+          canvas: "live2d2",
+          baseUrl: "./model/33",
+          model: model('33'),
+          interval: 5000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
+          idle: "idle", // 自动触发的mation
+          width: "400", // html上的width属性优先级更高
+          height: "400", // html上的height属性优先级更高
+          debug: {
+            DEBUG_LOG: true,
+            DEBUG_MOUSE_LOG: false
+          },
+          binding: {
+            head: {
+              motion: ["tap_body","shake"],
+              callback: function(options) {
+                // console.log(hitArea);
+                // console.log(motionName);
+                // console.log(name)
+                console.log("hint head callback: hentai",options);
+                // return false
+              }
+            }
+          },
+          initModelCallback(waifu){
+            window.waifu2 = waifu
+            console.log('33 loaded')
+          }
+        };
+      }
       var kaguya = {
-        canvas: document.getElementById("live2d"),
+        canvas: document.getElementById("live2d2"),
         baseUrl: "./model/kaguya/",
         allowSound: true,
         interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
@@ -158,40 +221,12 @@
         initModelCallback(waifu) {
           console.log(waifu);
           console.log("模型加载完毕");
+          window.waifu = loadLive2d(model22());
           // waifu.startRandomMotion('shake',2)
         }
       };
-      window.model22 = function(){
-        return {
-          canvas: "live2d",
-          baseUrl: "./model/22",
-          model: model(),
-          interval: 5000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
-          idle: "idle", // 自动触发的mation
-          width: "400", // html上的width属性优先级更高
-          height: "400", // html上的height属性优先级更高
-          debug: {
-            DEBUG_LOG: true,
-            DEBUG_MOUSE_LOG: false
-          },
-          binding: {
-            head: {
-              motion: ["tap_body","shake"],
-              callback: function(options) {
-                // console.log(hitArea);
-                // console.log(motionName);
-                // console.log(name)
-                console.log("hint head callback: hentai",options);
-                // return false
-              }
-            }
-          },
-          initModelCallback(waifu){
-            window.waifu = waifu
-          }
-        };
-      }
       window.waifu = loadLive2d(model22());
+      
     </script>
   </body>
 </html>
