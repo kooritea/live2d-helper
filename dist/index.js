@@ -2454,6 +2454,7 @@ LAppModel.prototype.startMotion = function (name, no, priority, hitArea, callbac
         this.mainMotionManager.setReservePriority(priority);
     }
     else if (!this.mainMotionManager.reserveMotion(priority)){ // 当前有Motion在播放列表中
+        
         if (this.obj.debug.DEBUG_LOG)
             console.log("Motion is running.")
         return;
@@ -2563,7 +2564,7 @@ function loadLive2d(data, data2) {
 }
 
 function live2dHelper(data, data2) {
-  let { canvas, baseUrl, model, imageUrl, soundUrl, interval, width, height, layout, debug, idle, view, crossOrigin, initModelCallback, scaling, globalFollowPointer, binding, autoLoadAudio, allowSound } = data
+  let { canvas, baseUrl, model, imageUrl, soundUrl, interval, width, height, layout, debug, idle, view, initModelCallback, scaling, globalFollowPointer, binding, autoLoadAudio, allowSound } = data
   if (typeof data === 'string' || data instanceof HTMLElement) {
     canvas = data
     baseUrl = data2
@@ -2572,6 +2573,7 @@ function live2dHelper(data, data2) {
     console.error('Not Found canvas or baseUrl')
     return
   }
+  this.lid = (new Date()).valueOf()
   this.baseUrl = /\/$/.test(baseUrl) ? baseUrl : baseUrl + '/'
   this.imageUrl = imageUrl ? imageUrl : this.baseUrl // 图片资源的路径
   this.imageUrl = /\/$/.test(this.imageUrl) ? this.imageUrl : this.imageUrl + '/'
@@ -2595,11 +2597,11 @@ function live2dHelper(data, data2) {
   this.model = null /*new LAppModel();*/
 
   this.isDrawStart = false;
+  this.isDelete = false // 当为true时会打断requestAnimationFrame不在更新模型
 
   this.gl = null;
   this.canvas = canvas instanceof HTMLElement ? canvas : document.getElementById(canvas)
 
-  this.crossOrigin = crossOrigin
   this.dragMgr = null; /*new L2DTargetPoint();*/
   this.viewMatrix = null; /*new L2DViewMatrix();*/
   this.projMatrix = null; /*new L2DMatrix44()*/
@@ -2646,7 +2648,7 @@ function live2dHelper(data, data2) {
       }
     }
   }
-  this.clearTexture()
+  this.clear()
   this.initL2dCanvas(width, height)
   this.initModel()
   this.initLive2d()
@@ -2721,28 +2723,31 @@ live2dHelper.prototype.throttle = function (handle, wait) {
 live2dHelper.prototype.initL2dCanvas = function (width, height) {
   this.canvas.setAttribute('width', this.canvas.getAttribute('width') || width || 500)
   this.canvas.setAttribute('height', this.canvas.getAttribute('height') || height || 500)
+  this.mouseEventHandle = this.mouseEvent.bind(this)
+  this.touchEventHandle = this.touchEvent.bind(this)
+  this.gfpEventHandle = this.throttle(function (e) {
+    self.mouseEvent(e)
+  }, 50)
   var self = this
   if (this.canvas.addEventListener) {
     if (this.globalFollowPointer) {
-      document.documentElement.addEventListener("mousemove", this.throttle(function (e) {
-        self.mouseEvent(e)
-      }, 50), false);
+      document.documentElement.addEventListener("mousemove", this.gfpEventHandle , false);
     } else {
-      this.canvas.addEventListener("mousemove", this.mouseEvent.bind(this), false);
-      this.canvas.addEventListener("mouseout", this.mouseEvent.bind(this), false);
+      this.canvas.addEventListener("mousemove", this.mouseEventHandle, false);
+      this.canvas.addEventListener("mouseout", this.mouseEventHandle, false);
     }
     if (this.scaling) {
-      this.canvas.addEventListener("mousewheel", this.mouseEvent.bind(this), false);
+      this.canvas.addEventListener("mousewheel", this.mouseEventHandle, false);
     }
-    this.canvas.addEventListener("click", this.mouseEvent.bind(this), false);
-    this.canvas.addEventListener("mousedown", this.mouseEvent.bind(this), false);
-    this.canvas.addEventListener("mouseup", this.mouseEvent.bind(this), false);
-    this.canvas.addEventListener("contextmenu", this.mouseEvent.bind(this), false);
+    this.canvas.addEventListener("click", this.mouseEventHandle, false);
+    this.canvas.addEventListener("mousedown", this.mouseEventHandle, false);
+    this.canvas.addEventListener("mouseup", this.mouseEventHandle, false);
+    this.canvas.addEventListener("contextmenu", this.mouseEventHandle, false);
 
 
-    this.canvas.addEventListener("touchstart", this.touchEvent.bind(this), false);
-    this.canvas.addEventListener("touchend", this.touchEvent.bind(this), false);
-    this.canvas.addEventListener("touchmove", this.touchEvent.bind(this), false);
+    this.canvas.addEventListener("touchstart", this.touchEventHandle, false);
+    this.canvas.addEventListener("touchend", this.touchEventHandle, false);
+    this.canvas.addEventListener("touchmove", this.touchEventHandle, false);
   }
 }
 live2dHelper.prototype.mouseEvent = function (e) {
@@ -2848,7 +2853,6 @@ live2dHelper.prototype.lookFront = function () {
 
 live2dHelper.prototype.modelTurnHead = function (event) {
   this.drag = true;
-
   var rect = event.target.getBoundingClientRect();
 
   var sx = this.transformScreenX(event.clientX - rect.left);
@@ -2929,17 +2933,16 @@ live2dHelper.prototype.startDraw = function () {
   var self = this
   if (!this.isDrawStart) {
     this.isDrawStart = true;
-    (function tick() {
-      self.draw();
-
-      var requestAnimationFrame =
+    var requestAnimationFrame =
         window.requestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.msRequestAnimationFrame;
-
-
-      requestAnimationFrame(tick, self.canvas);   // 浏览器api 自定义重绘方法
+    (function tick() {
+      if(!self.isDelete){
+        self.draw();
+        self.requestID = requestAnimationFrame(tick, self.canvas);   // 浏览器api 自定义重绘方法
+      }
     })();
   }
 }
@@ -3088,12 +3091,33 @@ live2dHelper.prototype.startRandomMotion = function (motionName, priority) {
 live2dHelper.prototype.startMotion = function (motionName, no, priority) {
   this.model.startMotion(motionName, no, priority)
 }
-live2dHelper.prototype.clearTexture = function () {
-  if (this.canvas.live2d) {
-    this.canvas.live2d.model.release(this.canvas.live2d.gl)
-    clearInterval(this.canvas.live2d.model.timmer)
-    this.canvas.live2d.audio.pause()
-    delete this.canvas.live2d
+live2dHelper.prototype.clearTexture = function (obj) {
+  obj = obj?obj:this
+  obj.model.release(obj.gl)
+  clearTimeout(obj.model.startRandomMotionTimer)
+  obj.model.startRandomMotionTimer = null  
+  obj.audio.pause()
+}
+live2dHelper.prototype.clear = function(){
+  if (this.canvas.live2d){
+    let oldObj = this.canvas.live2d
+    oldObj.isDelete = true
+    oldObj.clearTexture(oldObj)
+    setTimeout(()=>{
+      let cancelAnimationFrame =window.cancelAnimationFrame ||window.mozCancelAnimationFrame;
+      cancelAnimationFrame(oldObj.requestID); 
+    })
+    document.documentElement.removeEventListener("mousemove", oldObj.gfpEventHandle);
+    oldObj.canvas.removeEventListener("mousemove", oldObj.mouseEventHandle);
+    oldObj.canvas.removeEventListener("mouseout", oldObj.mouseEventHandle);
+    oldObj.canvas.removeEventListener("mousewheel", oldObj.mouseEventHandle);
+    oldObj.canvas.removeEventListener("click", oldObj.mouseEventHandle);
+    oldObj.canvas.removeEventListener("mousedown", oldObj.mouseEventHandle);
+    oldObj.canvas.removeEventListener("mouseup", oldObj.mouseEventHandle);
+    oldObj.canvas.removeEventListener("contextmenu", oldObj.mouseEventHandle);
+    oldObj.canvas.removeEventListener("touchstart", oldObj.touchEventHandle);
+    oldObj.canvas.removeEventListener("touchend", oldObj.touchEventHandle);
+    oldObj.canvas.removeEventListener("touchmove", oldObj.touchEventHandle);
   }
 }
 live2dHelper.prototype.loadAudio = function () {

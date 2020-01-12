@@ -161,40 +161,37 @@
           // waifu.startRandomMotion('shake',2)
         }
       };
-      var model22 = {
-        canvas: "live2d",
-        baseUrl: "./model/22",
-        model: model(),
-        interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
-        idle: "idle", // 自动触发的mation
-        width: "400", // html上的width属性优先级更高
-        height: "400", // html上的height属性优先级更高
-        debug: {
-          DEBUG_LOG: true,
-          DEBUG_MOUSE_LOG: false
-        },
-        binding: {
-          head: {
-            motion: ["tap_body","shake"],
-            callback: function(options) {
-              // console.log(hitArea);
-              // console.log(motionName);
-              // console.log(name)
-              console.log("hint head callback: hentai",options);
-              // return false
+      window.model22 = function(){
+        return {
+          canvas: "live2d",
+          baseUrl: "./model/22",
+          model: model(),
+          interval: 5000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
+          idle: "idle", // 自动触发的mation
+          width: "400", // html上的width属性优先级更高
+          height: "400", // html上的height属性优先级更高
+          debug: {
+            DEBUG_LOG: true,
+            DEBUG_MOUSE_LOG: false
+          },
+          binding: {
+            head: {
+              motion: ["tap_body","shake"],
+              callback: function(options) {
+                // console.log(hitArea);
+                // console.log(motionName);
+                // console.log(name)
+                console.log("hint head callback: hentai",options);
+                // return false
+              }
             }
+          },
+          initModelCallback(waifu){
+            window.waifu = waifu
           }
-        },
-        autoLoadAudio: function() {
-          console.log("音频加载完毕");
-        },
-        initModelCallback(waifu) {
-          console.log(waifu);
-          console.log("模型加载完毕");
-          // waifu.startRandomMotion('shake',2)
-        }
-      };
-      window.waifu = loadLive2d(kaguya);
+        };
+      }
+      window.waifu = loadLive2d(model22());
     </script>
   </body>
 </html>
