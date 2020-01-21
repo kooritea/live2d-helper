@@ -2914,7 +2914,7 @@ live2dHelper.prototype.modelScaling = function (scale) {
   if (!isMaxScale) {
     if (this.viewMatrix.isMaxScale()) {
       // obj.model.startRandomMotion();
-      // 放到最大时的mation
+      // 放到最大时的motion
       if (this.debug.DEBUG_LOG)
         console.log('isMaxScale')
     }
@@ -2923,7 +2923,7 @@ live2dHelper.prototype.modelScaling = function (scale) {
   if (!isMinScale) {
     if (this.viewMatrix.isMinScale()) {
       //obj.model.startRandomMotion(LAppDefine.MOTION_GROUP_PINCH_OUT,LAppDefine.PRIORITY_NORMAL);
-      // 缩到最小时的mation
+      // 缩到最小时的motion
       if (this.debug.DEBUG_LOG)
         console.log('isMinScale')
     }

@@ -67,8 +67,8 @@ loadLive2d({
   imageUrl: "./model/kaguya", // 图片资源的根路径，最后获取资源的实际路径是这个路径加上model.json中定义的相对路径，不填该项则默认是baseUrl
   soundUrl: "./model/kaguya", // 音频资源的根路径，最后获取资源的实际路径是这个路径加上model.json中定义的相对路径，不填该项则默认是baseUrl
   allowSound: true, // 是否允许播放音频，如果有的话 def：true
-  interval: 30000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔,有语音的话从语音播放结束开始计算
-  idle: "idle", // 自动触发的mation
+  interval: 30000, // 自动motion的开始时间点到下一个motion的开始点之间的间隔,有语音的话从语音播放结束开始计算
+  idle: "idle", // 自动触发的motion
   width: "800", // html上的width属性优先级更高
   height: "800", // html上的height属性优先级更高
   globalFollowPointer: false, // 老婆焦点跟随鼠标 def:false
@@ -101,7 +101,7 @@ loadLive2d({
     VIEW_LOGICAL_MAX_TOP: 2
   },
   binding: {// 详细配置方法在下一点
-    // 需要自行根据不同模型的model.json将mation绑定到对应的hit_areas 支持hit_areas_custom
+    // 需要自行根据不同模型的model.json将motion绑定到对应的hit_areas 支持hit_areas_custom
     head: "flick_head",
     face: "tap_face",
     breast: ["tap_breast", "shake"],
@@ -206,11 +206,11 @@ loadLive2d 和 initModelCallback 将会返回一个对象，该对象包含了�
 ```javascript
 var waifu = loadLive2d("canvasId", "baseUrl");
 
-waifu.startRandomMotion((mationName: string), (priority: number));
-// 随机进行mationName下的一个mation,优先级为priority
+waifu.startRandomMotion((motionName: string), (priority: number));
+// 随机进行motionName下的一个motion,优先级为priority
 
-waifu.startMotion((mationName: string), (no: number), (priority: number));
-// 进行mationName下第no个mation,优先级为priority
+waifu.startMotion((motionName: string), (no: number), (priority: number));
+// 进行motionName下第no个motion,优先级为priority
 ```
 
 |    官方名称     | 优先级 |     备注      |
