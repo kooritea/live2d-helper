@@ -2587,7 +2587,7 @@ function live2dHelper(data, data2) {
   }else{
     this.modelUrl = model && typeof model === 'string' ? model : this.baseUrl + 'model.json' // model.json的路径
   }
-  
+
 
 
   this.platform = window.navigator.platform.toLowerCase();
@@ -2892,7 +2892,7 @@ live2dHelper.prototype.modelTurnHead = function (event) {
     for (let name in this.model.modelSetting.json.hit_areas_custom_data) {
       let item = this.model.modelSetting.json.hit_areas_custom_data[name]
       if (item.x[0] < vx && item.x[1] > vy && item.y[0] > vx && item.y[1] < vy) {// 点击命中自定义区域
-        
+
         if (this.binding[name]) {
           let motionName = this.binding[name].motion[parseInt(Math.random() * this.binding[name].motion.length)]
           this.model.startRandomMotion(motionName, 2, name, this.binding[name].callback);
@@ -3095,7 +3095,7 @@ live2dHelper.prototype.clearTexture = function (obj) {
   obj = obj?obj:this
   obj.model.release(obj.gl)
   clearTimeout(obj.model.startRandomMotionTimer)
-  obj.model.startRandomMotionTimer = null  
+  obj.model.startRandomMotionTimer = null
   obj.audio.pause()
 }
 live2dHelper.prototype.clear = function(){
@@ -3105,7 +3105,7 @@ live2dHelper.prototype.clear = function(){
     oldObj.clearTexture(oldObj)
     setTimeout(()=>{
       let cancelAnimationFrame =window.cancelAnimationFrame ||window.mozCancelAnimationFrame;
-      cancelAnimationFrame(oldObj.requestID); 
+      cancelAnimationFrame(oldObj.requestID);
     })
     document.documentElement.removeEventListener("mousemove", oldObj.gfpEventHandle);
     oldObj.canvas.removeEventListener("mousemove", oldObj.mouseEventHandle);
