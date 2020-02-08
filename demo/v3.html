@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+  </head>
+
+  <body>
+    <canvas id="live2d" class="live2d"></canvas>
+    <script src="../src/Core/live2dcubismcore.min.js"></script>
+    <script src="../dist/index.js"></script>
+    <script type="text/javascript">
+      let live2dHelper = new Live2dHelper({
+        canvas: "#live2d",
+        // baseUrl: "./model/Rice",
+        // model: "./model/Rice/model.json",
+        baseUrl: "./model/xuefeng",
+        model: "./model/xuefeng/xuefeng_3.model3.json",
+        // imageUrl: 'https://cdn.jsdelivr.net/gh/kooritea/kooritea.github.io/live2d/kaguya',
+        // soundUrl: 'https://www.kooritea.cc/live2d/kaguya',
+        // soundUrl: './model/kaguya',
+        allowSound: true,
+        interval: 15000, // 自动mation的开始时间点到下一个mation的开始点之间的间隔
+        idle: "idle", // 自动触发的mation
+        width: "800", // html上的width属性优先级更高
+        height: "800", // html上的height属性优先级更高
+        globalFollowPointer: false, // 全局跟随鼠标 def:false
+        scaling: true, // 允许滚轮放大缩小 def:false
+        debug: true,
+        layout: {
+          // 布局设置 这个优先级最高，然后到model.json(字段正确的话)，再到默认
+          width: "",
+          height: "",
+          x: "",
+          y: "",
+          center_x: "",
+          center_y: "",
+          top: "",
+          bottom: "",
+          left: "",
+          right: ""
+        },
+        view: {
+          VIEW_MAX_SCALE: 2, // 最大缩放比例
+          VIEW_MIN_SCALE: 0.8, // 最小缩放比例
+          VIEW_LOGICAL_LEFT: -1,
+          VIEW_LOGICAL_RIGHT: 1,
+          VIEW_LOGICAL_MAX_LEFT: -2,
+          VIEW_LOGICAL_MAX_RIGHT: 2,
+          VIEW_LOGICAL_MAX_BOTTOM: -2,
+          VIEW_LOGICAL_MAX_TOP: 2
+        },
+        binding: {
+          Body: {
+            motion: "TapBody",
+            callback: () => {
+              console.log("hentai");
+            }
+          }
+        },
+        autoLoadAudio: function() {
+          console.log("音频加载完毕");
+        },
+        initModelCallback(waifu) {
+          console.log(waifu);
+          console.log("模型加载完毕");
+        }
+      });
+      window.live2dHelper = live2dHelper;
+      console.log(live2dHelper);
+    </script>
+  </body>
+</html>

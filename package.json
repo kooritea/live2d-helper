@@ -1,0 +1,39 @@
+{
+  "name": "live2d-helper",
+  "version": "2.0.0",
+  "description": "Quick display of live2d model",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx webpack --config webpack.config.build.js",
+    "watch": "npx webpack --watch --config webpack.config.js"
+  },
+  "files": [
+    "dist/index.js"
+  ],
+  "devDependencies": {
+    "glob": "^7.1.4",
+    "npm-run-all": "^4.1.5",
+    "serve": "^11.1.0",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {
+    "whatwg-fetch": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kooritea/live2d-helper.git"
+  },
+  "keywords": [
+    "live2d",
+    "waifu"
+  ],
+  "author": "kooritea",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/kooritea/live2d-helper/issues"
+  },
+  "homepage": "https://github.com/kooritea/live2d-helper#readme"
+}
