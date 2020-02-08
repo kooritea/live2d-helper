@@ -1,5 +1,9 @@
 # Live2d-helper
 
+## live2d-helper@1.x.x版本如无重大bug基本不会再更新
+
+@1.x.x版本只能显示2.x的live模型,如果需要显示3.x版本的模型请使用live2d-helper@2.x.x
+
 [![npm](https://img.shields.io/npm/v/live2d-helper.svg?style=flat)](https://www.npmjs.com/package/live2d-helper)
 
 基于官方 live2d.js(2.1) 的、更加简单易用的 live2d-helper，通过简单的配置在网页上显示 live2d(waifu)
