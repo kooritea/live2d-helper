@@ -6,6 +6,7 @@
  */
 
 /// <reference path="../../Core/live2dcubismcore.d.ts" />
+const Live2DCubismCore = require("../../Core/live2dcubismcore.min.js") 
 import {Live2DCubismFramework as cubismmodel} from "./cubismmodel";
 import CubismModel = cubismmodel.CubismModel;
 import { CSM_ASSERT } from "../utils/cubismdebug";
