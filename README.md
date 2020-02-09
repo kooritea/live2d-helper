@@ -23,7 +23,9 @@ npm install live2d-helper
 ### 准备 live2d 模型
 
 基本上按照 demo 里面那样子放置资源即可  
-这里内置的 live2d.js 使用的是`2.1`的版本模型  
+live2d-helper @2.x.x 使用的是3.x版本的模型  
+3.x版本的模型的model一般的命名方式为name_3.model3.json  
+并且有一个`"version": 3`的字段
 其他版本的模型可能不通用!
 
 ### 引入 live2d-helper
