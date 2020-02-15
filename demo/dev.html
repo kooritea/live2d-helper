@@ -7,7 +7,7 @@
 
   <body>
     <canvas id="live2d" class="live2d"></canvas>
-    <canvas id="live2d2" class="live2d"></canvas>
+    <canvas id="live2d2" style="position: fixed;bottom:0;right:0;" class="live2d"></canvas>
     <button
       type="button"
       onclick="waifu.startRandomMotion('shake', 2)"
@@ -161,7 +161,7 @@
         idle: "idle", // 自动触发的motion
         width: "400", // html上的width属性优先级更高
         height: "400", // html上的height属性优先级更高
-        // globalFollowPointer: true, // 全局跟随鼠标 def:false
+        globalFollowPointer: true, // 全局跟随鼠标 def:false
         scaling: true, // 允许滚轮放大缩小 def:false
         debug: {
           DEBUG_LOG: true,
@@ -221,11 +221,11 @@
         initModelCallback(waifu) {
           console.log(waifu);
           console.log("模型加载完毕");
-          window.waifu = loadLive2d(model22());
+          // window.waifu = loadLive2d(model22());
           // waifu.startRandomMotion('shake',2)
         }
       };
-      window.waifu = loadLive2d(model22());
+      window.waifu = loadLive2d(kaguya);
 
     </script>
   </body>

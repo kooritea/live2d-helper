@@ -2826,8 +2826,7 @@ live2dHelper.prototype.getWebGLContext = function () {
 }
 
 live2dHelper.prototype.followPointer = function (event) {
-  var rect = event.target.getBoundingClientRect();
-
+  var rect = this.canvas.getBoundingClientRect();
   var sx = this.transformScreenX(event.clientX - rect.left);
   var sy = this.transformScreenY(event.clientY - rect.top);
   var vx = this.transformViewX(event.clientX - rect.left);

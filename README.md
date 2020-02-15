@@ -1,6 +1,6 @@
 # Live2d-helper
 
-## live2d-helper@1.x.x版本如无重大bug基本不会再更新
+## live2d-helper@1.x.x版本~~如无重大bug基本不会再更新~~还是修吧,看着bug不舒服,新功能就没有了
 
 @1.x.x版本只能显示2.x的live模型,如果需要显示3.x版本的模型请使用live2d-helper@2.x.x
 
