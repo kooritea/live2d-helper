@@ -273,7 +273,7 @@ export namespace Live2DCubismFramework {
 
       return {
         hit: left <= tx && tx <= right && top <= ty && ty <= bottom,
-        area: Math.abs(left-right)*Math.abs(bottom-top)
+        area: Math.abs(left - right) * Math.abs(bottom - top)
       };
     }
 

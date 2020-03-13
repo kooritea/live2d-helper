@@ -232,18 +232,16 @@ export class TouchManager {
   public onTap(x: number, y: number): void {
     Logger.log(`onTap x: ${x} y: ${y}`, true);
     let hitList = this._model.getHitList(x, y)
-    for(let drawId of hitList){
-      if(this._setting.debug){
-        Logger.log(`Hit drawId : ${drawId.id}`, true);
-      }
-      if(this._setting.binding[drawId.id]){
+    for (let drawId of hitList) {
+      Logger.log(`Hit drawId : ${drawId.id}`, true);
+      if (this._setting.binding[drawId.id]) {
         this._model.startRandomMotion(
           Utils.getRandomItem(this._setting.binding[drawId.id].motion),
           2
         );
         return
-      }else{
-        if(this._setting.debug){
+      } else {
+        if (this._setting.debug) {
           Logger.log(`Hit drawId ${drawId.id} not found binding`, true);
         }
       }

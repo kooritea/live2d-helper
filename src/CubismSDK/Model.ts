@@ -45,7 +45,6 @@ import CubismDefaultParameterId = cubismdefaultparameterid;
 import Csm_CubismMatrix44 = cubismmatrix44.CubismMatrix44;
 
 import { TextureManager } from "./TextureManager";
-import "whatwg-fetch";
 import { Utils } from "../Utils";
 import { Webgl } from "./Webgl";
 import { Setting } from "../Setting";
@@ -210,42 +209,71 @@ export class Model extends CubismUserModel {
       let layout: csmMap<string, number> = new csmMap<string, number>();
       this._modelSetting.getLayoutMap(layout);
       this._modelMatrix.setupFromLayout(layout);
-      this._state = LoadStep.LoadMotion;
-      this._state = LoadStep.WaitLoadMotion;
-      this._model.saveParameters();
-      this._allMotionCount = 0;
-      this._motionCount = 0;
-      let group: string[] = [];
 
-      let motionGroupCount: number = this._modelSetting.getMotionGroupCount();
 
-      // モーションの総数を求める
-      for (let i: number = 0; i < motionGroupCount; i++) {
-        group[i] = this._modelSetting.getMotionGroupName(i);
-        this._allMotionCount += this._modelSetting.getMotionCount(group[i]);
-      }
+      this._state = LoadStep.LoadTexture;
+      this._updating = false;
+      this._initialized = true;
+      this.createRenderer();
+      this.setupTextures();
+      this.getRenderer().startUp(this._webgl.gl);
 
-      // モーションの読み込み
-      for (let i: number = 0; i < motionGroupCount; i++) {
-        this.preLoadMotionGroup(group[i]);
-      }
-
-      // モーションがない場合
-      if (motionGroupCount == 0) {
-        this._state = LoadStep.LoadTexture;
-
-        // 全てのモーションを停止する
-        this._motionManager.stopAllMotions();
-
-        this._updating = false;
-        this._initialized = true;
-
-        this.createRenderer();
-        this.setupTextures();
-        this.getRenderer().startUp(this._webgl.gl);
-      }
     } else {
       // LAppPal.printLog("Model data does not exist.");
+    }
+  }
+
+  private async setupMotion() {
+    this._state = LoadStep.LoadMotion;
+    this._state = LoadStep.WaitLoadMotion;
+    this._model.saveParameters();
+    this._allMotionCount = 0;
+    this._motionCount = 0;
+    let group: string[] = [];
+
+    let motionGroupCount: number = this._modelSetting.getMotionGroupCount();
+
+    // モーションの総数を求める
+    for (let i: number = 0; i < motionGroupCount; i++) {
+      group[i] = this._modelSetting.getMotionGroupName(i);
+      this._allMotionCount += this._modelSetting.getMotionCount(group[i]);
+    }
+    const motionBuffers: Array<{ name: string, group: string, i: number, buffer: ArrayBuffer }> = []
+    // モーションがない場合
+    if (motionGroupCount > 0) {
+      for (let i: number = 0; i < motionGroupCount; i++) {
+        await this.preLoadMotionGroup(group[i], motionBuffers);
+      }
+      for (let { buffer, name, group, i } of motionBuffers) {
+        let size = buffer.byteLength;
+
+        let tmpMotion: CubismMotion = <CubismMotion>(
+          await this.loadMotion(buffer, size, name)
+        );
+        let fadeTime = this._modelSetting.getMotionFadeInTimeValue(group, i);
+        if (fadeTime >= 0.0) {
+          tmpMotion.setFadeInTime(fadeTime);
+        }
+
+        fadeTime = this._modelSetting.getMotionFadeOutTimeValue(group, i);
+        if (fadeTime >= 0.0) {
+          tmpMotion.setFadeOutTime(fadeTime);
+        }
+        tmpMotion.setEffectIds(this._eyeBlinkIds, this._lipSyncIds);
+
+        if (this._motions.getValue(name) != null) {
+          ACubismMotion.delete(this._motions.getValue(name));
+        }
+
+        this._motions.setValue(name, tmpMotion);
+
+        this._motionCount++;
+        if (this._motionCount >= this._allMotionCount) {
+          this._motionManager.stopAllMotions();
+        }
+      }
+    } else {
+      this._motionManager.stopAllMotions();
     }
   }
 
@@ -276,6 +304,7 @@ export class Model extends CubismUserModel {
         this._textureCount++;
         this.getRenderer().setIsPremultipliedAlpha(usePremultiply);
       }
+      this.setupMotion()
       this._state = LoadStep.CompleteSetup;
     }
   }
@@ -392,9 +421,7 @@ export class Model extends CubismUserModel {
     if (priority == this._setting.Priority.Force) {
       this._motionManager.setReservePriority(priority);
     } else if (!this._motionManager.reserveMotion(priority)) {
-      if (this._debugMode) {
-        Logger.log("can't start motion.");
-      }
+      Logger.log("can't start motion.", true);
       return InvalidMotionQueueEntryHandleValue;
     }
 
@@ -413,11 +440,11 @@ export class Model extends CubismUserModel {
         .then(response => {
           return response.arrayBuffer();
         })
-        .then(arrayBuffer => {
+        .then(async arrayBuffer => {
           let buffer: ArrayBuffer = arrayBuffer;
           let size = buffer.byteLength;
 
-          motion = <CubismMotion>this.loadMotion(buffer, size, null);
+          motion = <CubismMotion>(await this.loadMotion(buffer, size, null));
           let fadeTime: number = this._modelSetting.getMotionFadeInTimeValue(
             group,
             no
@@ -434,14 +461,22 @@ export class Model extends CubismUserModel {
 
           motion.setEffectIds(this._eyeBlinkIds, this._lipSyncIds);
           autoDelete = true; // 終了時にメモリから削除
+          Logger.log(`start motion: [${group}_${no}]`, true);
+          return this._motionManager.startMotionPriority(
+            motion,
+            autoDelete,
+            priority
+          );
         });
+    } else {
+      Logger.log(`start motion: [${group}_${no}]`, true);
+      return this._motionManager.startMotionPriority(
+        motion,
+        autoDelete,
+        priority
+      );
     }
-    Logger.log(`start motion: [${group}_${no}]`, true);
-    return this._motionManager.startMotionPriority(
-      motion,
-      autoDelete,
-      priority
-    );
+
   }
 
   /**
@@ -547,12 +582,12 @@ export class Model extends CubismUserModel {
     cubismIdHandle: CubismIdHandle,
     area: number,
     id: string
-  }>{
+  }> {
     let result = []
-    for(let drawId of this.getDrawableIds()){
+    for (let drawId of this.getDrawableIds()) {
       let cubismIdHandle = CubismFramework.getIdManager().getId(drawId)
       let hitStatus = this.isHit(cubismIdHandle, x, y)
-      if(hitStatus.hit){
+      if (hitStatus.hit) {
         result.push({
           cubismIdHandle,
           area: hitStatus.area,
@@ -560,10 +595,10 @@ export class Model extends CubismUserModel {
         })
       }
     }
-    result.sort((a,b)=>{
+    result.sort((a, b) => {
       return a.area - b.area
     })
-    
+
     return result
   }
 
@@ -573,7 +608,7 @@ export class Model extends CubismUserModel {
    *
    * @param group モーションデータのグループ名
    */
-  public preLoadMotionGroup(group: string): void {
+  public async preLoadMotionGroup(group: string, motionBuffers: Array<{ name: string, group: string, i: number, buffer: ArrayBuffer }>): Promise<void> {
     for (let i: number = 0; i < this._modelSetting.getMotionCount(group); i++) {
       // ex) idle_0
       let name: string = CubismString.getFormatedString("{0}_{1}", group, i);
@@ -581,51 +616,12 @@ export class Model extends CubismUserModel {
       path = this._setting.baseUrl + path;
 
       Logger.log(`load motion: ${path} => [${group}_${i}]`, true);
-
-      fetch(path)
-        .then(response => {
-          return response.arrayBuffer();
-        })
-        .then(arrayBuffer => {
-          let buffer: ArrayBuffer = arrayBuffer;
-          let size = buffer.byteLength;
-
-          let tmpMotion: CubismMotion = <CubismMotion>(
-            this.loadMotion(buffer, size, name)
-          );
-
-          let fadeTime = this._modelSetting.getMotionFadeInTimeValue(group, i);
-          if (fadeTime >= 0.0) {
-            tmpMotion.setFadeInTime(fadeTime);
-          }
-
-          fadeTime = this._modelSetting.getMotionFadeOutTimeValue(group, i);
-          if (fadeTime >= 0.0) {
-            tmpMotion.setFadeOutTime(fadeTime);
-          }
-          tmpMotion.setEffectIds(this._eyeBlinkIds, this._lipSyncIds);
-
-          if (this._motions.getValue(name) != null) {
-            ACubismMotion.delete(this._motions.getValue(name));
-          }
-
-          this._motions.setValue(name, tmpMotion);
-
-          this._motionCount++;
-          if (this._motionCount >= this._allMotionCount) {
-            this._state = LoadStep.LoadTexture;
-
-            // 全てのモーションを停止する
-            this._motionManager.stopAllMotions();
-
-            this._updating = false;
-            this._initialized = true;
-
-            this.createRenderer();
-            this.setupTextures();
-            this.getRenderer().startUp(this._webgl.gl);
-          }
-        });
+      motionBuffers.push({
+        name,
+        group,
+        i,
+        buffer: await (await fetch(path)).arrayBuffer()
+      })
     }
   }
 
@@ -700,7 +696,7 @@ export class Model extends CubismUserModel {
     this.draw(projection);
   }
 
-  public getDrawableIds(){
+  public getDrawableIds() {
     return this._model.getModel().drawables.ids
   }
 
