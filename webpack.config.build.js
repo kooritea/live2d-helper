@@ -1,8 +1,19 @@
 const path = require("path");
-
+const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 module.exports = {
   mode: "production",
   entry: "./src/main.ts",
+  optimization: {
+    minimizer: [
+      new UglifyJSPlugin({
+        uglifyOptions: {
+          ecma: 6,
+          keep_fnames: true,
+          keep_classnames: true
+        }
+      })
+    ]
+  },
   output: {
     filename: "index.js",
     path: path.join(__dirname, "./dist"),
@@ -23,7 +34,7 @@ module.exports = {
     extensions: [".ts"]
   },
   node: {
-    fs: 'empty'
+    fs: "empty"
   },
   performance: {
     hints: false
