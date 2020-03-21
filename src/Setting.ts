@@ -23,17 +23,17 @@ export class Setting {
     left: number;
     right: number;
   } = {
-    width: null,
-    height: null,
-    x: null,
-    y: null,
-    center_x: null,
-    center_y: null,
-    top: null,
-    bottom: null,
-    left: null,
-    right: null
-  };
+      width: null,
+      height: null,
+      x: null,
+      y: null,
+      center_x: null,
+      center_y: null,
+      top: null,
+      bottom: null,
+      left: null,
+      right: null
+    };
   public debug: boolean
   public idle: string = "idle";
   public view: {
@@ -46,16 +46,16 @@ export class Setting {
     VIEW_LOGICAL_MAX_BOTTOM: number;
     VIEW_LOGICAL_MAX_TOP: number;
   } = {
-    VIEW_MAX_SCALE: 2,
-    VIEW_MIN_SCALE: 0.8,
-    VIEW_LOGICAL_LEFT: -1.0,
-    VIEW_LOGICAL_RIGHT: 1.0,
-    VIEW_LOGICAL_MAX_LEFT: -2.0,
-    VIEW_LOGICAL_MAX_RIGHT: 2.0,
-    VIEW_LOGICAL_MAX_BOTTOM: -2.0,
-    VIEW_LOGICAL_MAX_TOP: 2.0
-  };
-  public initModelCallback: (live2dHelper) => void = live2dHelper => {};
+      VIEW_MAX_SCALE: 2,
+      VIEW_MIN_SCALE: 0.8,
+      VIEW_LOGICAL_LEFT: -1.0,
+      VIEW_LOGICAL_RIGHT: 1.0,
+      VIEW_LOGICAL_MAX_LEFT: -2.0,
+      VIEW_LOGICAL_MAX_RIGHT: 2.0,
+      VIEW_LOGICAL_MAX_BOTTOM: -2.0,
+      VIEW_LOGICAL_MAX_TOP: 2.0
+    };
+  public initModelCallback: (live2dHelper) => void = live2dHelper => { };
   public scaling: boolean = false;
   public globalFollowPointer: boolean = false;
   public binding: {
@@ -73,9 +73,9 @@ export class Setting {
     canLoad: boolean;
     callback: () => void;
   } = {
-    canLoad: true,
-    callback: () => {}
-  };
+      canLoad: true,
+      callback: () => { }
+    };
   public allowSound: boolean = true;
   public readonly Priority = {
     None: 0,
@@ -83,6 +83,7 @@ export class Setting {
     Normal: 2,
     Force: 3
   };
+  public motionLoadMode: 'lazy' | 'greedy' | 'textures_first'
 
   public async init(arg1: any, arg2?: string) {
     let _binding;
@@ -119,7 +120,8 @@ export class Setting {
         globalFollowPointer,
         binding,
         autoLoadAudio,
-        allowSound
+        allowSound,
+        motionLoadMode
       } = arg1;
 
       this.canvas =
@@ -141,6 +143,7 @@ export class Setting {
       this.layout = layout;
       this.debug = debug || this.debug;
       this.idle = idle;
+      this.motionLoadMode = motionLoadMode || 'lazy'
       if (view) {
         for (let key in this.view) {
           if (view[key]) {
@@ -151,7 +154,7 @@ export class Setting {
       this.initModelCallback =
         typeof initModelCallback === "function"
           ? initModelCallback
-          : live2dHelper => {};
+          : live2dHelper => { };
       this.scaling = typeof scaling === "boolean" ? scaling : false;
       this.globalFollowPointer =
         typeof globalFollowPointer === "boolean" ? globalFollowPointer : false;
@@ -163,7 +166,7 @@ export class Setting {
       } else if (typeof autoLoadAudio === "boolean") {
         this.autoLoadAudio = {
           canLoad: autoLoadAudio,
-          callback: () => {}
+          callback: () => { }
         };
       }
       this.model = model;
@@ -188,7 +191,7 @@ export class Setting {
   private initBind(binding: object) {
     for (let id in binding) {
       let motion = [];
-      let callback = function({ hitArea, motionPath, motionName, priority }) {};
+      let callback = function ({ hitArea, motionPath, motionName, priority }) { };
       if (typeof binding[id] === "string") {
         motion.push(binding[id]);
       } else if (Array.isArray(binding[id])) {
@@ -231,7 +234,7 @@ export class Setting {
         } else {
           this.binding[item.Id] = {
             motion,
-            callback: function({ hitArea, motionPath, motionName, priority }) {}
+            callback: function ({ hitArea, motionPath, motionName, priority }) { }
           };
         }
       }

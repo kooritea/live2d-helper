@@ -210,102 +210,75 @@ export class Model extends CubismUserModel {
       this._modelSetting.getLayoutMap(layout);
       this._modelMatrix.setupFromLayout(layout);
 
-
-      this._state = LoadStep.LoadTexture;
-      this._updating = false;
-      this._initialized = true;
-      this.createRenderer();
-      this.setupTextures();
-      this.getRenderer().startUp(this._webgl.gl);
-
+      switch (this._setting.motionLoadMode) {
+        case 'greedy':
+          this._state = LoadStep.LoadMotion;
+          this._state = LoadStep.WaitLoadMotion;
+          await this.setupMotion()
+          await this.setupTextures();
+          this._state = LoadStep.CompleteSetup;
+          break
+        case 'textures_first':
+          await this.setupTextures();
+          this._state = LoadStep.CompleteSetup;
+          this.setupMotion()
+          break
+        default:
+          await this.setupTextures();
+          this._state = LoadStep.CompleteSetup;
+      }
     } else {
       // LAppPal.printLog("Model data does not exist.");
     }
   }
 
   private async setupMotion() {
-    this._state = LoadStep.LoadMotion;
-    this._state = LoadStep.WaitLoadMotion;
     this._model.saveParameters();
-    this._allMotionCount = 0;
-    this._motionCount = 0;
-    let group: string[] = [];
 
     let motionGroupCount: number = this._modelSetting.getMotionGroupCount();
-
-    // モーションの総数を求める
+    let promises = []
     for (let i: number = 0; i < motionGroupCount; i++) {
-      group[i] = this._modelSetting.getMotionGroupName(i);
-      this._allMotionCount += this._modelSetting.getMotionCount(group[i]);
+      let groupName = this._modelSetting.getMotionGroupName(i);
+      for (let k: number = 0; k < this._modelSetting.getMotionCount(groupName); k++) {
+        promises.push(
+          this.registerMotion(groupName, k)
+        )
+      }
     }
-    const motionBuffers: Array<{ name: string, group: string, i: number, buffer: ArrayBuffer }> = []
-    // モーションがない場合
-    if (motionGroupCount > 0) {
-      for (let i: number = 0; i < motionGroupCount; i++) {
-        await this.preLoadMotionGroup(group[i], motionBuffers);
-      }
-      for (let { buffer, name, group, i } of motionBuffers) {
-        let size = buffer.byteLength;
-
-        let tmpMotion: CubismMotion = <CubismMotion>(
-          await this.loadMotion(buffer, size, name)
-        );
-        let fadeTime = this._modelSetting.getMotionFadeInTimeValue(group, i);
-        if (fadeTime >= 0.0) {
-          tmpMotion.setFadeInTime(fadeTime);
-        }
-
-        fadeTime = this._modelSetting.getMotionFadeOutTimeValue(group, i);
-        if (fadeTime >= 0.0) {
-          tmpMotion.setFadeOutTime(fadeTime);
-        }
-        tmpMotion.setEffectIds(this._eyeBlinkIds, this._lipSyncIds);
-
-        if (this._motions.getValue(name) != null) {
-          ACubismMotion.delete(this._motions.getValue(name));
-        }
-
-        this._motions.setValue(name, tmpMotion);
-
-        this._motionCount++;
-        if (this._motionCount >= this._allMotionCount) {
-          this._motionManager.stopAllMotions();
-        }
-      }
-    } else {
+    await Promise.all(promises).then(() => {
       this._motionManager.stopAllMotions();
-    }
+    })
   }
 
   private async setupTextures(): Promise<void> {
     let usePremultiply: boolean = true;
-
-    if (this._state == LoadStep.LoadTexture) {
-      this._state = LoadStep.WaitLoadTexture;
-      let textureCount: number = this._modelSetting.getTextureCount();
-      for (
-        let modelTextureNumber = 0;
-        modelTextureNumber < textureCount;
-        modelTextureNumber++
-      ) {
-        if (this._modelSetting.getTextureFileName(modelTextureNumber) == "") {
-          console.log("getTextureFileName null");
-          continue;
-        }
-        let texturePath = this._modelSetting.getTextureFileName(
-          modelTextureNumber
-        );
-        texturePath = this._setting.baseUrl + texturePath;
-        let textureInfo = await this._textureManager.createTextureFromPngFile(
-          texturePath,
-          usePremultiply
-        );
-        this.getRenderer().bindTexture(modelTextureNumber, textureInfo.id);
-        this._textureCount++;
-        this.getRenderer().setIsPremultipliedAlpha(usePremultiply);
+    this._state = LoadStep.LoadTexture;
+    this._updating = false;
+    this._initialized = true;
+    this.createRenderer();
+    this._state = LoadStep.WaitLoadTexture;
+    let textureCount: number = this._modelSetting.getTextureCount();
+    for (
+      let modelTextureNumber = 0;
+      modelTextureNumber < textureCount;
+      modelTextureNumber++
+    ) {
+      if (this._modelSetting.getTextureFileName(modelTextureNumber) == "") {
+        console.log("getTextureFileName null");
+        continue;
       }
-      this.setupMotion()
-      this._state = LoadStep.CompleteSetup;
+      let texturePath = this._modelSetting.getTextureFileName(
+        modelTextureNumber
+      );
+      texturePath = this._setting.baseUrl + texturePath;
+      let textureInfo = await this._textureManager.createTextureFromPngFile(
+        texturePath,
+        usePremultiply
+      );
+      this.getRenderer().bindTexture(modelTextureNumber, textureInfo.id);
+      this._textureCount++;
+      this.getRenderer().setIsPremultipliedAlpha(usePremultiply);
+      this.getRenderer().startUp(this._webgl.gl);
     }
   }
 
@@ -316,6 +289,43 @@ export class Model extends CubismUserModel {
     this.deleteRenderer();
     this.createRenderer();
     this.setupTextures();
+  }
+
+  /**
+   * 注册之后通过this._motions.getValue(name)获取
+   * @param groupName 
+   * @param index 
+   * @return CubismMotion
+   */
+  async registerMotion(groupName: string, index: number): Promise<CubismMotion> {
+    let path = this._modelSetting.getMotionFileName(groupName, index);
+    Logger.log(`register motion: ${path} => [${groupName}_${index}]`, true);
+    return this.preLoadMotion(path).then((buffer) => {
+      let name: string = CubismString.getFormatedString("{0}_{1}", groupName, index);
+      Logger.log(`load motion complete: ${path} => [${groupName}_${index}]`, true);
+      let size = buffer.byteLength;
+      let tmpMotion: CubismMotion = <CubismMotion>(
+        this.loadMotion(buffer, size, name)
+      );
+      let fadeTime = this._modelSetting.getMotionFadeInTimeValue(groupName, index);
+      if (fadeTime >= 0.0) {
+        tmpMotion.setFadeInTime(fadeTime);
+      }
+
+      fadeTime = this._modelSetting.getMotionFadeOutTimeValue(groupName, index);
+      if (fadeTime >= 0.0) {
+        tmpMotion.setFadeOutTime(fadeTime);
+      }
+      tmpMotion.setEffectIds(this._eyeBlinkIds, this._lipSyncIds);
+
+      if (this._motions.getValue(name) != null) {
+        ACubismMotion.delete(this._motions.getValue(name));
+      }
+
+      this._motions.setValue(name, tmpMotion);
+      Logger.log(`motion parse complete: ${path} => [${groupName}_${index}]`, true);
+      return tmpMotion
+    })
   }
 
   /**
@@ -424,55 +434,24 @@ export class Model extends CubismUserModel {
       Logger.log("can't start motion.", true);
       return InvalidMotionQueueEntryHandleValue;
     }
-
     const fileName: string = this._modelSetting.getMotionFileName(group, no);
-
-    // ex) idle_0
     let name: string = CubismString.getFormatedString("{0}_{1}", group, no);
     let motion: CubismMotion = <CubismMotion>this._motions.getValue(name);
-    let autoDelete: boolean = false;
 
     if (motion == null) {
-      let path: string = fileName;
-      path = this._setting.baseUrl + path;
-
-      fetch(path)
-        .then(response => {
-          return response.arrayBuffer();
-        })
-        .then(async arrayBuffer => {
-          let buffer: ArrayBuffer = arrayBuffer;
-          let size = buffer.byteLength;
-
-          motion = <CubismMotion>(await this.loadMotion(buffer, size, null));
-          let fadeTime: number = this._modelSetting.getMotionFadeInTimeValue(
-            group,
-            no
-          );
-
-          if (fadeTime >= 0.0) {
-            motion.setFadeInTime(fadeTime);
-          }
-
-          fadeTime = this._modelSetting.getMotionFadeOutTimeValue(group, no);
-          if (fadeTime >= 0.0) {
-            motion.setFadeOutTime(fadeTime);
-          }
-
-          motion.setEffectIds(this._eyeBlinkIds, this._lipSyncIds);
-          autoDelete = true; // 終了時にメモリから削除
-          Logger.log(`start motion: [${group}_${no}]`, true);
-          return this._motionManager.startMotionPriority(
-            motion,
-            autoDelete,
-            priority
-          );
-        });
+      this.registerMotion(group, no).then((_motion) => {
+        Logger.log(`start motion: [${group}_${no}]`, true);
+        this._motionManager.startMotionPriority(
+          _motion,
+          false,
+          priority
+        );
+      })
     } else {
       Logger.log(`start motion: [${group}_${no}]`, true);
       return this._motionManager.startMotionPriority(
         motion,
-        autoDelete,
+        false,
         priority
       );
     }
@@ -625,6 +604,11 @@ export class Model extends CubismUserModel {
     }
   }
 
+  public async preLoadMotion(path: string): Promise<ArrayBuffer> {
+    path = this._setting.baseUrl + path;
+    return await (await fetch(path)).arrayBuffer()
+  }
+
   /**
    * すべてのモーションデータを解放する。
    */
@@ -754,8 +738,6 @@ export class Model extends CubismUserModel {
     this._state = LoadStep.LoadAssets;
     this._expressionCount = 0;
     this._textureCount = 0;
-    this._motionCount = 0;
-    this._allMotionCount = 0;
 
     this.loadAssets(this._setting.modelBuffer);
   }
@@ -792,6 +774,4 @@ export class Model extends CubismUserModel {
   _state: number; // 現在のステータス管理用
   _expressionCount: number; // 表情データカウント
   _textureCount: number; // テクスチャカウント
-  _motionCount: number; // モーションデータカウント
-  _allMotionCount: number; // モーション総数
 }
